@@ -193,6 +193,126 @@ Ce document décrit la structure exacte de chaque UserForm à créer dans l'édi
 
 ---
 
+## Formulaire 5 : `FrmGererAteliers`
+
+**Propriétés du formulaire :**
+| Propriété | Valeur |
+|---|---|
+| Name | `FrmGererAteliers` |
+| Caption | `Gérer les Ateliers` |
+| Width | `640` |
+| Height | `620` |
+| StartUpPosition | `1 - CenterOwner` |
+
+### Contrôles — Zone de recherche et liste des ateliers
+
+| Name | Type | Caption/Text | Left | Top | Width | Height |
+|---|---|---|---|---|---|---|
+| `LblRecherche` | Label | `Rechercher par nom :` | 12 | 12 | 130 | 18 |
+| `TxtRecherche` | TextBox | *(vide)* | 148 | 9 | 200 | 22 |
+| `LstAteliers` | ListBox | *(vide)* | 12 | 40 | 600 | 110 |
+
+**Propriétés de `LstAteliers` :**
+- `MultiSelect` : `0 - fmMultiSelectSingle`
+- `ColumnCount` : `4`
+- `ColumnWidths` : `40;200;80;120`
+
+### Contrôles — Zone de détail de l'atelier
+
+| Name | Type | Caption/Text | Left | Top | Width | Height |
+|---|---|---|---|---|---|---|
+| `LblNom` | Label | `Nom de l'atelier :` | 12 | 165 | 120 | 18 |
+| `TxtNom` | TextBox | *(vide)* | 140 | 162 | 200 | 22 |
+| `LblDate` | Label | `Date (JJ/MM/AAAA) :` | 12 | 193 | 120 | 18 |
+| `TxtDate` | TextBox | *(vide)* | 140 | 190 | 120 | 22 |
+| `LblHeureDebut` | Label | `Heure début (HH:MM) :` | 12 | 221 | 120 | 18 |
+| `TxtHeureDebut` | TextBox | *(vide)* | 140 | 218 | 80 | 22 |
+| `LblHeureFin` | Label | `Heure fin (HH:MM) :` | 12 | 249 | 120 | 18 |
+| `TxtHeureFin` | TextBox | *(vide)* | 140 | 246 | 80 | 22 |
+| `LblDuree` | Label | `Durée :` | 12 | 277 | 120 | 18 |
+| `TxtDuree` | TextBox | *(vide)* | 140 | 274 | 80 | 22 |
+| `LblTheme` | Label | `Thème :` | 12 | 305 | 120 | 18 |
+| `CboTheme` | ComboBox | *(vide)* | 140 | 302 | 180 | 22 |
+| `LblNbPart` | Label | `Nb participants :` | 360 | 165 | 120 | 18 |
+| `TxtNbParticipants` | TextBox | *(vide)* | 488 | 162 | 60 | 22 |
+| `LblNbPartPro` | Label | `Nb participants pro :` | 360 | 193 | 120 | 18 |
+| `TxtNbParticipantsPro` | TextBox | *(vide)* | 488 | 190 | 60 | 22 |
+
+**Propriétés importantes :**
+- `TxtDuree` : `Enabled = False`, `Locked = True` (lecture seule)
+- `TxtNbParticipants` : `Enabled = False`, `Locked = True` (lecture seule)
+- `TxtNbParticipantsPro` : `Enabled = False`, `Locked = True` (lecture seule)
+- `CboTheme` : `Style = 2 - fmStyleDropDownList`
+- Les champs de détail (`TxtNom`, `TxtDate`, `TxtHeureDebut`, `TxtHeureFin`, `CboTheme`) ont `Enabled = False` par défaut ; ils s'activent à la sélection d'un atelier
+
+### Contrôles — Zone des présences
+
+| Name | Type | Caption/Text | Left | Top | Width | Height |
+|---|---|---|---|---|---|---|
+| `LblPresences` | Label | `Participants présents à l'atelier :` | 12 | 340 | 220 | 18 |
+| `LstPresences` | ListBox | *(vide)* | 12 | 362 | 600 | 130 |
+
+**Propriétés de `LstPresences` :**
+- `MultiSelect` : `0 - fmMultiSelectSingle`
+- `ColumnCount` : `4`
+- `ColumnWidths` : `40;150;120;100`
+
+### Contrôles — Boutons d'action
+
+| Name | Type | Caption/Text | Left | Top | Width | Height |
+|---|---|---|---|---|---|---|
+| `BtnSauvegarder` | CommandButton | `💾 Sauvegarder` | 12 | 510 | 130 | 30 |
+| `BtnSupprimerAtelier` | CommandButton | `🗑️ Supprimer l'atelier` | 160 | 510 | 160 | 30 |
+| `BtnSupprimerPresence` | CommandButton | `❌ Retirer la présence` | 340 | 510 | 160 | 30 |
+| `BtnFermer` | CommandButton | `Fermer` | 520 | 510 | 90 | 30 |
+
+**Propriétés des boutons d'action :**
+- `BtnSauvegarder` : `Enabled = False` par défaut
+- `BtnSupprimerAtelier` : `Enabled = False` par défaut
+- `BtnSupprimerPresence` : `Enabled = False` par défaut
+
+### Disposition suggérée
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Gérer les Ateliers                                          │
+├─────────────────────────────────────────────────────────────┤
+│ Rechercher par nom : [TxtRecherche          ]               │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ LstAteliers (ID | Nom | Date | Thème)                   │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│ ─────────────────── Détail de l'atelier ────────────────── │
+│ Nom de l'atelier : [TxtNom            ]  Nb part. :  [   ] │
+│ Date (JJ/MM/AAAA): [TxtDate  ]           Nb part.pro:[   ] │
+│ Heure début      : [TxtHDbut ]                              │
+│ Heure fin        : [TxtHFin  ]                              │
+│ Durée            : [TxtDuree ]                              │
+│ Thème            : [CboTheme            ]                   │
+│ ───────────────── Participants présents ───────────────── │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ LstPresences (ID | Nom | Prénom | Statut)               │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│ [Sauvegarder] [Supprimer l'atelier] [Retirer présence] [X] │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Instructions pour créer le formulaire dans l'éditeur VBA
+
+1. Dans l'éditeur VBA (Alt+F11), menu **Insertion → UserForm**
+2. Dans la fenêtre **Propriétés**, définir :
+   - `Name` : `FrmGererAteliers`
+   - `Caption` : `Gérer les Ateliers`
+   - `Width` : `640`
+   - `Height` : `620`
+3. Ajouter les contrôles depuis la **Boîte à outils** en respectant le tableau ci-dessus
+4. Pour `TxtDuree`, `TxtNbParticipants`, `TxtNbParticipantsPro` : définir `Enabled = False` et `Locked = True` dans les propriétés
+5. Pour `CboTheme` : définir `Style = 2 - fmStyleDropDownList`
+6. Pour les boutons `BtnSauvegarder`, `BtnSupprimerAtelier`, `BtnSupprimerPresence` : définir `Enabled = False`
+7. Double-cliquer sur le formulaire pour ouvrir la fenêtre de code
+8. Copier-coller le contenu du fichier `src/FrmGererAteliers.frm`
+
+---
+
 ## Notes générales sur les UserForms
 
 1. **Toujours vérifier les noms des contrôles** : Le code VBA référence les contrôles par leur nom exact. Une erreur de nom provoquera une erreur à l'exécution.

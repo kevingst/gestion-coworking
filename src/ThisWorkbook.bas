@@ -124,3 +124,10 @@ End Sub
 Public Sub OuvrirFrmGererParticipants()
     FrmGererParticipants.Show
 End Sub
+
+' -----------------------------------------------------------------------------
+' OuvrirFrmGererAteliers : Ouvre le formulaire Gérer Ateliers (pour bouton)
+' -----------------------------------------------------------------------------
+Public Sub OuvrirFrmGererAteliers()
+    FrmGererAteliers.Show
+End Sub

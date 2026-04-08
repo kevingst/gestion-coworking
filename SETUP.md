@@ -151,6 +151,7 @@ Pour chaque formulaire (`.frm`), vous devez :
 | `FrmSaisirPresences.frm` | `FrmSaisirPresences` |
 | `FrmNouveauParticipant.frm` | `FrmNouveauParticipant` |
 | `FrmGererParticipants.frm` | `FrmGererParticipants` |
+| `FrmGererAteliers.frm` | `FrmGererAteliers` |
 
 > **Note** : Le détail des contrôles à ajouter sur chaque formulaire est décrit dans `formulaires.md`.
 
@@ -162,7 +163,7 @@ Pour chaque formulaire (`.frm`), vous devez :
    - **Fichier → Options → Personnaliser le ruban** → cochez `Développeur`
 2. Allez sur la feuille `ACCUEIL`
 3. Dans l'onglet **Développeur → Insérer → Contrôles de formulaire → Bouton**
-4. Dessinez 4 boutons sur la feuille et assignez les macros suivantes :
+4. Dessinez 5 boutons sur la feuille et assignez les macros suivantes :
 
 | Texte du bouton | Macro à assigner |
 |---|---|
@@ -170,6 +171,7 @@ Pour chaque formulaire (`.frm`), vous devez :
 | 📋 Saisir les Présences | `OuvrirFrmSaisirPresences` |
 | 👤 Nouveau Participant | `OuvrirFrmNouveauParticipant` |
 | 👁️ Gérer les Participants | `OuvrirFrmGererParticipants` |
+| 🔧 Gérer les Ateliers | `OuvrirFrmGererAteliers` |
 
 Pour assigner une macro à un bouton : **clic droit sur le bouton → Affecter une macro → choisir la macro → OK**
 
@@ -208,6 +210,7 @@ Pour protéger les feuilles (les données ne doivent se saisir que via les formu
    - 📋 Saisir les Présences → le formulaire s'ouvre
    - 👤 Nouveau Participant → le formulaire s'ouvre
    - 👁️ Gérer les Participants → le formulaire s'ouvre
+   - 🔧 Gérer les Ateliers → le formulaire s'ouvre
 
 ---
 
@@ -227,7 +230,8 @@ gestion-coworking/
     ├── FrmNouvelAtelier.frm    ← Formulaire Nouvel Atelier
     ├── FrmSaisirPresences.frm  ← Formulaire Saisir Présences
     ├── FrmNouveauParticipant.frm ← Formulaire Nouveau Participant
-    └── FrmGererParticipants.frm  ← Formulaire Gérer Participants
+    ├── FrmGererParticipants.frm  ← Formulaire Gérer Participants
+    └── FrmGererAteliers.frm      ← Formulaire Gérer Ateliers
 ```
 
 ---
