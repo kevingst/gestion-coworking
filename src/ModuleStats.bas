@@ -22,9 +22,6 @@ Public Sub MettreAJourStats()
     
     Dim ligneAtelier As ListRow
     Dim dateAtelier As Date
-    Dim dureeAtelier As String
-    Dim heuresAtelier As Integer
-    Dim minutesAtelier As Integer
     
     ' Récupérer les feuilles
     On Error GoTo ErrStats
@@ -55,12 +52,22 @@ Public Sub MettreAJourStats()
                 nbAteliers = nbAteliers + 1
                 
                 ' Calculer la durée (colonne Duree = colonne 6)
-                dureeAtelier = CStr(ligneAtelier.Range.Cells(1, 6).Value)
-                If InStr(dureeAtelier, ":") > 0 Then
-                    heuresAtelier = CInt(Split(dureeAtelier, ":")(0))
-                    minutesAtelier = CInt(Split(dureeAtelier, ":")(1))
-                    dureeTotale = dureeTotale + (heuresAtelier * 60) + minutesAtelier
+                Dim dureeRawStat As Variant
+                dureeRawStat = ligneAtelier.Range.Cells(1, 6).Value
+                Dim dureeMinStat As Long
+                dureeMinStat = 0
+
+                If Not IsEmpty(dureeRawStat) And IsNumeric(dureeRawStat) Then
+                    ' Valeur décimale Excel (fraction de journée) → convertir en minutes
+                    dureeMinStat = CLng(CDbl(dureeRawStat) * 24 * 60)
+                ElseIf InStr(CStr(dureeRawStat), ":") > 0 Then
+                    ' Texte au format HH:MM
+                    Dim partiesStat() As String
+                    partiesStat = Split(CStr(dureeRawStat), ":")
+                    dureeMinStat = CInt(partiesStat(0)) * 60 + CInt(partiesStat(1))
                 End If
+
+                dureeTotale = dureeTotale + dureeMinStat
                 
                 ' Additionner les participants (colonne Nb_Participants = colonne 8)
                 If IsNumeric(ligneAtelier.Range.Cells(1, 8).Value) Then
