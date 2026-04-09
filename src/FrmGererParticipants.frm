@@ -5,7 +5,6 @@
 ' Contrôles requis (à créer dans l'éditeur VBA) :
 '   Zone de recherche :
 '   - TxtRecherche   : TextBox — Critère de recherche (Nom ou Prénom)
-'   - BtnRechercher  : CommandButton — Lancer la recherche
 '   - LstResultats   : ListBox — Résultats (ColumnCount=4 : ID, Nom, Prénom, Statut)
 '
 '   Zone d'édition (Enabled=False par défaut) :
@@ -21,7 +20,6 @@
 '   - TxtEActivite   : TextBox — Activité (éditable)
 '
 '   Boutons :
-'   - BtnModifier    : CommandButton — Activer les champs d'édition
 '   - BtnSauvegarder : CommandButton — Sauvegarder les modifications
 '   - BtnFermer      : CommandButton — Fermer le formulaire
 '
@@ -61,19 +59,10 @@ Private Sub UserForm_Initialize()
 End Sub
 
 ' -----------------------------------------------------------------------------
-' BtnRechercher_Click : Lance la recherche
+' TxtRecherche_Change : Filtrage en temps réel de la liste des participants
 ' -----------------------------------------------------------------------------
-Private Sub BtnRechercher_Click()
+Private Sub TxtRecherche_Change()
     Call LancerRecherche(TxtRecherche.Value)
-End Sub
-
-' -----------------------------------------------------------------------------
-' TxtRecherche_KeyDown : Lancement de la recherche avec la touche Entrée
-' -----------------------------------------------------------------------------
-Private Sub TxtRecherche_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 13 Then ' Touche Entrée
-        Call LancerRecherche(TxtRecherche.Value)
-    End If
 End Sub
 
 ' -----------------------------------------------------------------------------
@@ -110,37 +99,22 @@ Private Sub LancerRecherche(critere As String)
 End Sub
 
 ' -----------------------------------------------------------------------------
-' LstResultats_Click : Sélection d'un participant dans la liste
+' LstResultats_Click : Sélection d'un participant — charge ses données directement
 ' -----------------------------------------------------------------------------
 Private Sub LstResultats_Click()
-    ' Récupérer l'ID du participant sélectionné
     If LstResultats.ListIndex < 0 Then Exit Sub
     
     On Error Resume Next
     idParticipantSelectionne = CLng(LstResultats.List(LstResultats.ListIndex, 0))
     On Error GoTo 0
-End Sub
-
-' -----------------------------------------------------------------------------
-' BtnModifier_Click : Active les champs d'édition et charge les données
-' -----------------------------------------------------------------------------
-Private Sub BtnModifier_Click()
-    ' Vérifier qu'un participant est sélectionné
-    If idParticipantSelectionne <= 0 Then
-        MsgBox "Veuillez sélectionner un participant dans la liste.", vbExclamation, "Sélection manquante"
-        Exit Sub
+    
+    If idParticipantSelectionne <= 0 Then Exit Sub
+    
+    ' Charger les données et activer les champs immédiatement (sans bouton Modifier)
+    If ChargerDonneesParticipant(idParticipantSelectionne) Then
+        Call DefinirEtatEdition(True)
+        TxtENom.SetFocus
     End If
-    
-    ' Charger les données du participant dans les champs d'édition
-    If Not ChargerDonneesParticipant(idParticipantSelectionne) Then
-        Exit Sub
-    End If
-    
-    ' Activer les champs d'édition
-    Call DefinirEtatEdition(True)
-    
-    ' Mettre le focus sur le premier champ
-    TxtENom.SetFocus
 End Sub
 
 ' -----------------------------------------------------------------------------
