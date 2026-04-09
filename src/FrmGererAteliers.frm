@@ -167,8 +167,11 @@ Private Sub BtnSauvegarder_Click()
                     ligneAtelier.Range.Cells(1, 3).Value = nouvelleDate                ' Date
                     ligneAtelier.Range.Cells(1, 3).NumberFormat = "DD/MM/YYYY"
                     ligneAtelier.Range.Cells(1, 4).Value = TxtHeureDebut.Value         ' Heure_Debut
+                    ligneAtelier.Range.Cells(1, 4).NumberFormat = "HH:MM"
                     ligneAtelier.Range.Cells(1, 5).Value = TxtHeureFin.Value           ' Heure_Fin
+                    ligneAtelier.Range.Cells(1, 5).NumberFormat = "HH:MM"
                     ligneAtelier.Range.Cells(1, 6).Value = dureeFormatee               ' Duree
+                    ligneAtelier.Range.Cells(1, 6).NumberFormat = "@"  ' Texte pour forcer le stockage en HH:MM texte
                     ligneAtelier.Range.Cells(1, 7).Value = CboTheme.Value              ' Theme
                     trouve = True
                     Exit For
@@ -535,9 +538,46 @@ Private Sub ChargerDetailsAtelier(idAtelier As Long)
                 On Error GoTo 0
                 TxtDate.Value = dateStr
 
-                TxtHeureDebut.Value = CStr(ligneAtelier.Range.Cells(1, 4).Value)
-                TxtHeureFin.Value = CStr(ligneAtelier.Range.Cells(1, 5).Value)
-                TxtDuree.Value = CStr(ligneAtelier.Range.Cells(1, 6).Value)
+                ' Heure début — conversion du décimal Excel en format HH:MM
+                Dim heureDebutStr As String
+                heureDebutStr = ""
+                On Error Resume Next
+                If Not IsEmpty(ligneAtelier.Range.Cells(1, 4).Value) And IsNumeric(ligneAtelier.Range.Cells(1, 4).Value) Then
+                    heureDebutStr = Format(CDate(ligneAtelier.Range.Cells(1, 4).Value), "HH:MM")
+                ElseIf Not IsEmpty(ligneAtelier.Range.Cells(1, 4).Value) Then
+                    heureDebutStr = CStr(ligneAtelier.Range.Cells(1, 4).Value)
+                End If
+                On Error GoTo 0
+                TxtHeureDebut.Value = heureDebutStr
+
+                ' Heure fin — conversion du décimal Excel en format HH:MM
+                Dim heureFinStr As String
+                heureFinStr = ""
+                On Error Resume Next
+                If Not IsEmpty(ligneAtelier.Range.Cells(1, 5).Value) And IsNumeric(ligneAtelier.Range.Cells(1, 5).Value) Then
+                    heureFinStr = Format(CDate(ligneAtelier.Range.Cells(1, 5).Value), "HH:MM")
+                ElseIf Not IsEmpty(ligneAtelier.Range.Cells(1, 5).Value) Then
+                    heureFinStr = CStr(ligneAtelier.Range.Cells(1, 5).Value)
+                End If
+                On Error GoTo 0
+                TxtHeureFin.Value = heureFinStr
+
+                ' Durée — conversion du décimal Excel en format HH:MM
+                Dim dureeStr As String
+                dureeStr = ""
+                On Error Resume Next
+                Dim dureeRaw As Variant
+                dureeRaw = ligneAtelier.Range.Cells(1, 6).Value
+                If Not IsEmpty(dureeRaw) And IsNumeric(dureeRaw) Then
+                    ' Valeur décimale Excel → convertir en minutes
+                    Dim dureeMin As Long
+                    dureeMin = CLng(CDbl(dureeRaw) * 24 * 60)
+                    dureeStr = Format(dureeMin \ 60, "00") & ":" & Format(dureeMin Mod 60, "00")
+                ElseIf InStr(CStr(dureeRaw), ":") > 0 Then
+                    dureeStr = CStr(dureeRaw)
+                End If
+                On Error GoTo 0
+                TxtDuree.Value = dureeStr
 
                 ' Sélectionner le thème dans le ComboBox
                 Dim themeVal As String

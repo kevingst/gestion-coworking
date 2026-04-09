@@ -101,8 +101,11 @@ Public Function EnregistrerAtelier(nom As String, dateStr As String, _
         .Cells(1, 3).Value = nouvelleDate        ' Date
         .Cells(1, 3).NumberFormat = "DD/MM/YYYY" ' Formatage de la date
         .Cells(1, 4).Value = heureDebut          ' Heure_Debut
+        .Cells(1, 4).NumberFormat = "HH:MM"
         .Cells(1, 5).Value = heureFin            ' Heure_Fin
+        .Cells(1, 5).NumberFormat = "HH:MM"
         .Cells(1, 6).Value = dureeFormatee       ' Duree
+        .Cells(1, 6).NumberFormat = "@"  ' Texte pour éviter la conversion décimale
         .Cells(1, 7).Value = Trim(theme)         ' Theme
         .Cells(1, 8).Value = 0                   ' Nb_Participants (initialisé à 0)
         .Cells(1, 9).Value = 0                   ' Nb_Participants_Pro (initialisé à 0)
