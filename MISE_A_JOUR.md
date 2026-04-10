@@ -196,3 +196,37 @@ Les ateliers sont désormais triés du plus récent au plus ancien.
    - Insertion → Graphique → Histogramme groupé
    - Placer le graphique sur la feuille ACCUEIL
    - Titre du graphique : `Statistiques mensuelles ` & année
+
+---
+
+### [2026-04-10] Graphiques dynamiques — 2 graphiques sur ACCUEIL
+
+#### Fichiers modifiés
+- src/ModuleStats.bas — MettreAJourAccueil() enrichie : plage G:H + titres dynamiques
+
+#### Étapes manuelles dans Excel (à faire une seule fois)
+
+1. CRÉER LA PLAGE SOURCE G:H SUR ACCUEIL
+   - Lancer MettreAJourStats depuis la fenêtre Exécution VBA (Ctrl+G puis taper MettreAJourStats)
+   - Les cellules G1:H5 sont remplies automatiquement
+   - Masquer les colonnes G et H : sélectionner les colonnes G:H, clic droit → Masquer
+
+2. CRÉER LE GRAPHIQUE 1 — Stats du mois (GraphiqueMois)
+   - Sélectionner ACCUEIL!G1:H5 (même si masquées, utiliser la zone de nom pour naviguer)
+     Astuce : taper G1:H5 dans la zone de nom (en haut à gauche) puis Entrée
+   - Insertion → Graphique → Histogramme groupé → OK
+   - Placer le graphique sur ACCUEIL à l'emplacement souhaité
+   - Cliquer sur le graphique → dans la zone de nom (en haut à gauche), taper : GraphiqueMois → Entrée
+   - Le titre se mettra à jour automatiquement au prochain changement de sélecteur
+
+3. CRÉER LE GRAPHIQUE 2 — Bilan annuel (GraphiqueAnnee)
+   - Aller sur la feuille STATS
+   - Sélectionner A2:E14 (en-têtes de colonnes + les 12 lignes de mois)
+   - Insertion → Graphique → Courbe (ou Histogramme groupé) → OK
+   - Couper le graphique (Ctrl+X) → aller sur ACCUEIL → Coller (Ctrl+V)
+   - Cliquer sur le graphique → dans la zone de nom, taper : GraphiqueAnnee → Entrée
+   - Le titre "Bilan 2026" se mettra à jour automatiquement
+
+4. VÉRIFIER LE FONCTIONNEMENT
+   - Changer le mois en ACCUEIL!B1 → le titre de GraphiqueMois et ses données changent
+   - Changer l'année en ACCUEIL!B2 → les deux graphiques se mettent à jour

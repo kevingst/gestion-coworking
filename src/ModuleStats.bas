@@ -244,6 +244,64 @@ Public Sub MettreAJourAccueil()
     wsAccueil.Cells(12, 3).Value = wsStats.Cells(15, 4).Value  ' Nb participants total
     wsAccueil.Cells(13, 3).Value = wsStats.Cells(15, 5).Value  ' Nb participants pro total
     
+    ' --- Mise à jour de la plage source du Graphique 1 (mois sélectionné) ---
+    ' Colonnes G:H utilisées comme source fixe pour GraphiqueMois
+    ' La durée est convertie en minutes (entier) pour l'axe du graphique
+    On Error Resume Next
+    wsAccueil.Range("G1").Value = "Indicateur"
+    wsAccueil.Range("H1").Value = "Valeur"
+    wsAccueil.Range("G2").Value = "Nb Ateliers"
+    wsAccueil.Range("G3").Value = "Dur" & Chr(233) & "e (min)"
+    wsAccueil.Range("G4").Value = "Participants"
+    wsAccueil.Range("G5").Value = "Participants Pro"
+    
+    ' Lire les valeurs du mois depuis STATS
+    Dim ligneStats As Integer
+    ligneStats = numMois + 2  ' Janvier=mois 1 → ligne 3, etc.
+    
+    wsAccueil.Range("H2").Value = wsStats.Cells(ligneStats, 2).Value  ' Nb Ateliers
+    
+    ' Durée : convertir HH:MM en minutes pour le graphique
+    Dim dureeStr As String
+    dureeStr = CStr(wsStats.Cells(ligneStats, 3).Value)
+    Dim dureeGraphMin As Long
+    dureeGraphMin = 0
+    If InStr(dureeStr, ":") > 0 Then
+        Dim partiesGraph() As String
+        partiesGraph = Split(dureeStr, ":")
+        If UBound(partiesGraph) >= 1 Then
+            dureeGraphMin = CLng(partiesGraph(0)) * 60 + CLng(partiesGraph(1))
+        End If
+    ElseIf IsNumeric(dureeStr) And dureeStr <> "" Then
+        dureeGraphMin = CLng(CDbl(dureeStr) * 24 * 60)
+    End If
+    wsAccueil.Range("H3").Value = dureeGraphMin
+    
+    wsAccueil.Range("H4").Value = wsStats.Cells(ligneStats, 4).Value  ' Nb Participants
+    wsAccueil.Range("H5").Value = wsStats.Cells(ligneStats, 5).Value  ' Nb Participants Pro
+    On Error GoTo 0
+    
+    ' --- Mise à jour des titres des graphiques ---
+    ' Les graphiques doivent être nommés "GraphiqueMois" et "GraphiqueAnnee" dans Excel
+    Dim nomMoisAffiche As String
+    Dim anneeAffichee As String
+    nomMoisAffiche = nomMois   ' variable locale contenant le nom du mois ex: "Avril"
+    anneeAffichee = CStr(anneeAccueil)  ' variable locale contenant l'année ex: "2026"
+    
+    On Error Resume Next
+    Dim cht As ChartObject
+    For Each cht In wsAccueil.ChartObjects
+        If cht.Name = "GraphiqueMois" Then
+            cht.Chart.HasTitle = True
+            cht.Chart.ChartTitle.Text = nomMoisAffiche & " " & anneeAffichee
+        End If
+        If cht.Name = "GraphiqueAnnee" Then
+            cht.Chart.HasTitle = True
+            cht.Chart.ChartTitle.Text = "Bilan " & anneeAffichee
+        End If
+    Next cht
+    On Error GoTo 0
+    
     Exit Sub
     
 ErrAccueil:
