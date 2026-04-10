@@ -56,11 +56,15 @@ Ce document décrit la structure exacte de chaque UserForm à créer dans l'édi
 | Name | Type | Caption/Text | Left | Top | Width | Height |
 |---|---|---|---|---|---|---|
 | `LblSelAtelier` | Label | `1. Sélectionnez un atelier :` | 12 | 12 | 200 | 18 |
-| `LstAteliers` | ListBox | *(vide)* | 12 | 32 | 440 | 120 |
-| `LblSelPart` | Label | `2. Sélectionnez les participants présents :` | 12 | 165 | 280 | 18 |
-| `LstParticipants` | ListBox | *(vide)* | 12 | 185 | 440 | 200 |
-| `BtnValider` | CommandButton | `Valider les présences` | 60 | 400 | 160 | 30 |
-| `BtnAnnuler` | CommandButton | `Annuler` | 280 | 400 | 100 | 30 |
+| `LblRechercheAtelier` | Label | `Rechercher un atelier :` | 12 | 32 | 140 | 18 |
+| `TxtRechercheAtelier` | TextBox | *(vide)* | 158 | 29 | 294 | 22 |
+| `LstAteliers` | ListBox | *(vide)* | 12 | 56 | 440 | 110 |
+| `LblSelPart` | Label | `2. Sélectionnez les participants présents :` | 12 | 178 | 280 | 18 |
+| `LblRechercheParticipant` | Label | `Rechercher un participant :` | 12 | 198 | 150 | 18 |
+| `TxtRechercheParticipant` | TextBox | *(vide)* | 168 | 195 | 284 | 22 |
+| `LstParticipants` | ListBox | *(vide)* | 12 | 220 | 440 | 170 |
+| `BtnValider` | CommandButton | `Valider les présences` | 60 | 405 | 160 | 30 |
+| `BtnAnnuler` | CommandButton | `Annuler` | 280 | 405 | 100 | 30 |
 
 **Propriétés de `LstAteliers` :**
 - `MultiSelect` : `0 - fmMultiSelectSingle`
@@ -69,10 +73,10 @@ Ce document décrit la structure exacte de chaque UserForm à créer dans l'édi
 
 **Propriétés de `LstParticipants` :**
 - `MultiSelect` : `1 - fmMultiSelectMulti`
-- `ColumnCount` : `3`
-- `ColumnWidths` : `150;120;100`
+- `ColumnCount` : `4`
+- `ColumnWidths` : `0;150;120;100`
 
-> **Fonctionnement** : La sélection d'un atelier dans `LstAteliers` déclenche le chargement de `LstParticipants`. Les participants déjà présents à l'atelier sélectionné sont automatiquement pré-cochés et grisés.
+> **Fonctionnement** : La saisie dans `TxtRechercheAtelier` filtre la liste des ateliers en temps réel (tri par date décroissante). La sélection d'un atelier dans `LstAteliers` déclenche le chargement de `LstParticipants`. La saisie dans `TxtRechercheParticipant` filtre la liste des participants en temps réel. Les participants déjà présents à l'atelier sélectionné sont automatiquement pré-cochés. La première colonne de `LstParticipants` (largeur 0) contient l'ID masqué du participant.
 
 ---
 
