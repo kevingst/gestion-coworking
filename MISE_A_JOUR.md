@@ -157,3 +157,42 @@ Les ateliers sont désormais triés du plus récent au plus ancien.
 > **Note** : La propriété `ColumnWidths` de `LstParticipants` passe de `"150;120;100"` à `"0;150;120;100"`
 > (4 colonnes, la première masquée contenant l'ID du participant).
 > Vérifiez que `ColumnCount = 4` est bien défini sur `LstParticipants`.
+
+---
+
+### [2026-04-10] Statistiques mensuelles — Feuille STATS + sélecteurs ACCUEIL
+
+#### Fichiers modifiés
+- `src/ModuleStats.bas` — refactorisé avec `RecalculerStatsAnnee()` et `MettreAJourAccueil()`
+- `src/FeuilleStats.bas` — NOUVEAU (module de la feuille STATS)
+- `src/FeuilleAccueil.bas` — NOUVEAU (module de la feuille ACCUEIL)
+
+#### Étapes manuelles dans Excel
+
+1. **CRÉER LA FEUILLE STATS**
+   - Clic droit sur un onglet → Insérer une feuille → la nommer exactement `STATS`
+   - Taper `2026` en cellule B1
+   - Ajouter une validation de données sur B1 : Liste = `2024;2025;2026;2027;2028`
+
+2. **COLLER LE CODE DE FEUILLE**
+   - Dans l'éditeur VBA (Alt+F11), développer **Microsoft Excel Objects**
+   - Double-cliquer sur **STATS** → coller le contenu de `src/FeuilleStats.bas`
+   - Double-cliquer sur **ACCUEIL** → coller le contenu de `src/FeuilleAccueil.bas`
+   - Double-cliquer sur **ModuleStats** → remplacer le contenu par `src/ModuleStats.bas`
+
+3. **CONFIGURER ACCUEIL**
+   - En B1 : taper le mois en cours (ex: `Avril`)
+   - Ajouter une validation de données sur B1 : Liste = `Janvier,Février,Mars,Avril,Mai,Juin,Juillet,Août,Septembre,Octobre,Novembre,Décembre`
+   - En B2 : taper l'année en cours (ex: `2026`)
+   - Ajouter une validation de données sur B2 : Liste = `2024;2025;2026;2027;2028`
+
+4. **INITIALISER LES STATS**
+   - Dans l'éditeur VBA, ouvrir la fenêtre Exécution (Ctrl+G)
+   - Taper : `MettreAJourStats`
+   - Appuyer sur Entrée → les données apparaissent dans STATS et ACCUEIL
+
+5. **CRÉER LE GRAPHIQUE (manuel)**
+   - Dans STATS, sélectionner A2:E14 (en-têtes + 12 mois)
+   - Insertion → Graphique → Histogramme groupé
+   - Placer le graphique sur la feuille ACCUEIL
+   - Titre du graphique : `Statistiques mensuelles ` & année
