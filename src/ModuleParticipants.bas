@@ -1,7 +1,6 @@
-Attribute VB_Name = "ModuleParticipants"
 ' =============================================================================
 ' Module : ModuleParticipants
-' Description : Gestion des participants — création et modification
+' Description : Gestion des participants â€” crÃ©ation et modification
 ' =============================================================================
 
 ' Statuts disponibles pour les participants
@@ -9,18 +8,18 @@ Public Const STATUTS_PARTICIPANTS As String = "Projet pro,Lancé"
 
 ' -----------------------------------------------------------------------------
 ' EnregistrerParticipant : Enregistre un nouveau participant dans PARTICIPANTS
-' Paramètres :
+' ParamÃ¨tres :
 '   nom           : Nom du participant (obligatoire)
-'   prenom        : Prénom du participant
+'   prenom        : PrÃ©nom du participant
 '   statut        : Statut ("Projet pro" ou "Lancé")
 '   dateContact   : Date du premier contact au format JJ/MM/AAAA
 '   nomEntreprise : Nom de l'entreprise
 '   commune       : Commune
 '   codePostal    : Code postal
 '   mail          : Adresse mail
-'   telephone     : Numéro de téléphone
-'   activite      : Description de l'activité (texte libre)
-' Retourne True si succès, False si erreur
+'   telephone     : NumÃ©ro de tÃ©lÃ©phone
+'   activite      : Description de l'activitÃ© (texte libre)
+' Retourne True si succÃ¨s, False si erreur
 ' -----------------------------------------------------------------------------
 Public Function EnregistrerParticipant(nom As String, prenom As String, _
                                        statut As String, dateContact As String, _
@@ -48,16 +47,16 @@ Public Function EnregistrerParticipant(nom As String, prenom As String, _
         On Error GoTo 0
     End If
     
-    ' Accès à la feuille et au tableau
+    ' AccÃ¨s Ã  la feuille et au tableau
     On Error GoTo ErrFeuille
     Set wsParticipants = ThisWorkbook.Sheets("PARTICIPANTS")
     Set tblParticipants = wsParticipants.ListObjects("TblParticipants")
     On Error GoTo 0
     
-    ' Désprotéger la feuille pour écrire
+    ' DÃ©sprotÃ©ger la feuille pour Ã©crire
     wsParticipants.Unprotect Password:=MOT_DE_PASSE
     
-    ' Calcul du prochain ID (en continuité avec les IDs existants)
+    ' Calcul du prochain ID (en continuitÃ© avec les IDs existants)
     nouvelID = 1
     If Not tblParticipants.DataBodyRange Is Nothing Then
         Dim ligne As ListRow
@@ -93,7 +92,7 @@ Public Function EnregistrerParticipant(nom As String, prenom As String, _
         .Cells(1, 11).Value = Trim(activite)       ' Activite
     End With
     
-    ' Reprotéger la feuille
+    ' ReprotÃ©ger la feuille
     wsParticipants.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
     
     EnregistrerParticipant = True
@@ -106,17 +105,17 @@ ErrDate:
     Exit Function
 
 ErrFeuille:
-    MsgBox "Erreur d'accès à la feuille PARTICIPANTS ou au tableau TblParticipants.", _
+    MsgBox "Erreur d'accÃ¨s Ã  la feuille PARTICIPANTS ou au tableau TblParticipants.", _
            vbCritical, "Erreur"
     Exit Function
 End Function
 
 ' -----------------------------------------------------------------------------
 ' ModifierParticipant : Modifie les informations d'un participant existant
-' Paramètres :
-'   idParticipant : L'ID du participant à modifier
-'   (autres paramètres : voir EnregistrerParticipant)
-' Retourne True si succès, False si erreur
+' ParamÃ¨tres :
+'   idParticipant : L'ID du participant Ã  modifier
+'   (autres paramÃ¨tres : voir EnregistrerParticipant)
+' Retourne True si succÃ¨s, False si erreur
 ' -----------------------------------------------------------------------------
 Public Function ModifierParticipant(idParticipant As Long, nom As String, _
                                     prenom As String, statut As String, _
@@ -145,13 +144,13 @@ Public Function ModifierParticipant(idParticipant As Long, nom As String, _
         On Error GoTo 0
     End If
     
-    ' Accès à la feuille et au tableau
+    ' AccÃ¨s Ã  la feuille et au tableau
     On Error GoTo ErrFeuille
     Set wsParticipants = ThisWorkbook.Sheets("PARTICIPANTS")
     Set tblParticipants = wsParticipants.ListObjects("TblParticipants")
     On Error GoTo 0
     
-    ' Désprotéger la feuille
+    ' DÃ©sprotÃ©ger la feuille
     wsParticipants.Unprotect Password:=MOT_DE_PASSE
     
     ' Rechercher le participant par son ID
@@ -160,7 +159,7 @@ Public Function ModifierParticipant(idParticipant As Long, nom As String, _
         For Each ligneParticipant In tblParticipants.ListRows
             If IsNumeric(ligneParticipant.Range.Cells(1, 1).Value) Then
                 If CLng(ligneParticipant.Range.Cells(1, 1).Value) = idParticipant Then
-                    ' Mettre à jour les informations
+                    ' Mettre Ã  jour les informations
                     With ligneParticipant.Range
                         .Cells(1, 2).Value = Trim(nom)
                         .Cells(1, 3).Value = Trim(prenom)
@@ -186,16 +185,16 @@ Public Function ModifierParticipant(idParticipant As Long, nom As String, _
         Next ligneParticipant
     End If
     
-    ' Reprotéger la feuille
+    ' ReprotÃ©ger la feuille
     wsParticipants.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
     
     If Not trouve Then
         MsgBox "Participant avec l'ID " & idParticipant & " introuvable.", _
-               vbExclamation, "Participant non trouvé"
+               vbExclamation, "Participant non trouvÃ©"
         Exit Function
     End If
     
-    ' Mettre à jour aussi les informations dénormalisées dans PRESENCES
+    ' Mettre Ã  jour aussi les informations dÃ©normalisÃ©es dans PRESENCES
     Call MettreAJourStatutPresences(idParticipant, Trim(statut))
     
     ModifierParticipant = True
@@ -208,15 +207,15 @@ ErrDate:
     Exit Function
 
 ErrFeuille:
-    MsgBox "Erreur d'accès à la feuille PARTICIPANTS ou au tableau TblParticipants.", _
+    MsgBox "Erreur d'accÃ¨s Ã  la feuille PARTICIPANTS ou au tableau TblParticipants.", _
            vbCritical, "Erreur"
     Exit Function
 End Function
 
 ' -----------------------------------------------------------------------------
-' MettreAJourStatutPresences : Met à jour le statut dans PRESENCES quand
-' le statut d'un participant change (pour la cohérence des données)
-' Paramètres :
+' MettreAJourStatutPresences : Met Ã  jour le statut dans PRESENCES quand
+' le statut d'un participant change (pour la cohÃ©rence des donnÃ©es)
+' ParamÃ¨tres :
 '   idParticipant : L'ID du participant
 '   nouveauStatut : Le nouveau statut
 ' -----------------------------------------------------------------------------
@@ -231,7 +230,7 @@ Private Sub MettreAJourStatutPresences(idParticipant As Long, nouveauStatut As S
     
     wsPresences.Unprotect Password:=MOT_DE_PASSE
     
-    ' Mettre à jour toutes les lignes de présence de ce participant
+    ' Mettre Ã  jour toutes les lignes de prÃ©sence de ce participant
     If Not tblPresences.DataBodyRange Is Nothing Then
         For Each lignePresence In tblPresences.ListRows
             ' Colonne 3 = ID_Participant
@@ -245,7 +244,7 @@ Private Sub MettreAJourStatutPresences(idParticipant As Long, nouveauStatut As S
     
     wsPresences.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
     
-    ' Recalculer toutes les statistiques (le statut a changé)
+    ' Recalculer toutes les statistiques (le statut a changÃ©)
     Call MettreAJourStats
     
     Exit Sub
@@ -263,9 +262,9 @@ Public Function ObtenirListeStatuts() As String()
 End Function
 
 ' -----------------------------------------------------------------------------
-' RechercherParticipants : Recherche des participants par nom ou prénom
-' Paramètre :
-'   critere : Le texte à rechercher
+' RechercherParticipants : Recherche des participants par nom ou prÃ©nom
+' ParamÃ¨tre :
+'   critere : Le texte Ã  rechercher
 ' Retourne un tableau 2D (ID, Nom, Prenom, Statut) ou un tableau vide
 ' -----------------------------------------------------------------------------
 Public Function RechercherParticipants(critere As String) As Variant
@@ -288,7 +287,7 @@ Public Function RechercherParticipants(critere As String) As Variant
         Exit Function
     End If
     
-    ' Compter les résultats d'abord
+    ' Compter les rÃ©sultats d'abord
     For Each ligneParticipant In tblParticipants.ListRows
         Dim nomP As String
         Dim prenomP As String
@@ -307,7 +306,7 @@ Public Function RechercherParticipants(critere As String) As Variant
         Exit Function
     End If
     
-    ' Remplir le tableau de résultats
+    ' Remplir le tableau de rÃ©sultats
     ReDim resultats(0 To nb - 1, 0 To 3)
     Dim i As Integer
     i = 0
