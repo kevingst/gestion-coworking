@@ -1,4 +1,3 @@
-Attribute VB_Name = "ModuleStats"
 ' =============================================================================
 ' Module : ModuleStats
 ' Description : Calcul et mise à jour des statistiques mensuelles et annuelles
@@ -109,7 +108,7 @@ Public Sub RecalculerStatsAnnee(annee As Integer)
                     dureeMin = 0
                     
                     If Not IsEmpty(dureeRaw) And IsNumeric(dureeRaw) Then
-                        ' Valeur décimale Excel (fraction de journée) → convertir en minutes
+                        ' Valeur décimale Excel (fraction de journée) ? convertir en minutes
                         dureeMin = CLng(CDbl(dureeRaw) * 24 * 60)
                     ElseIf InStr(CStr(dureeRaw), ":") > 0 Then
                         ' Texte au format HH:MM
@@ -257,7 +256,7 @@ Public Sub MettreAJourAccueil()
     
     ' Lire les valeurs du mois depuis STATS
     Dim ligneStats As Integer
-    ligneStats = numMois + 2  ' Janvier=mois 1 → ligne 3, etc.
+    ligneStats = numMois + 2  ' Janvier=mois 1 ? ligne 3, etc.
     
     wsAccueil.Range("H2").Value = wsStats.Cells(ligneStats, 2).Value  ' Nb Ateliers
     
