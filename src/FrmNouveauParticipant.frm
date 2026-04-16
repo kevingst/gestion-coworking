@@ -23,7 +23,7 @@
 ' UserForm_Initialize : Initialisation du formulaire à l'ouverture
 ' -----------------------------------------------------------------------------
 Private Sub UserForm_Initialize()
-    Dim statuts As String()
+    Dim statuts As Variant
     Dim statut As Variant
     
     ' Remplir la liste des statuts dans le ComboBox
@@ -88,3 +88,4 @@ Private Sub UserForm_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift
         Unload Me
     End If
 End Sub
+
