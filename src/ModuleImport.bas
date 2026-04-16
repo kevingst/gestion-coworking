@@ -1,45 +1,44 @@
-Attribute VB_Name = "ModuleImport"
 ' =============================================================================
 ' Module : ModuleImport
-' Description : Import de données existantes depuis la feuille IMPORT
+' Description : Import de donnÃ©es existantes depuis la feuille IMPORT
 '
 ' USAGE FUTUR :
-' Ce module est préparé pour permettre l'import de participants depuis un
-' fichier Excel existant. La feuille IMPORT doit contenir les données à
-' importer avec les mêmes colonnes que PARTICIPANTS :
+' Ce module est prÃ©parÃ© pour permettre l'import de participants depuis un
+' fichier Excel existant. La feuille IMPORT doit contenir les donnÃ©es Ã 
+' importer avec les mÃªmes colonnes que PARTICIPANTS :
 '   ID_Participant | Nom | Prenom | Statut | Date_Premier_Contact |
 '   Nom_Entreprise | Commune | Code_Postal | Mail | Telephone | Activite
 '
 ' Pour importer :
-' 1. Collez vos données dans la feuille IMPORT (sans la ligne d'en-tête)
-' 2. Cliquez sur le bouton "Importer les données"
-' 3. Les participants seront ajoutés à la feuille PARTICIPANTS
+' 1. Collez vos donnÃ©es dans la feuille IMPORT (sans la ligne d'en-tÃªte)
+' 2. Cliquez sur le bouton "Importer les donnÃ©es"
+' 3. Les participants seront ajoutÃ©s Ã  la feuille PARTICIPANTS
 '    en conservant leurs IDs existants
 '
-' ATTENTION : L'import ne duplique pas les participants déjà existants
-' (vérification par ID). Assurez-vous que les IDs dans IMPORT sont uniques.
+' ATTENTION : L'import ne duplique pas les participants dÃ©jÃ  existants
+' (vÃ©rification par ID). Assurez-vous que les IDs dans IMPORT sont uniques.
 ' =============================================================================
 
 ' -----------------------------------------------------------------------------
-' ImporterDonnees : Importe les données de la feuille IMPORT vers PARTICIPANTS
-' Cette macro est assignée au bouton "Importer les données" de la feuille IMPORT
+' ImporterDonnees : Importe les donnÃ©es de la feuille IMPORT vers PARTICIPANTS
+' Cette macro est assignÃ©e au bouton "Importer les donnÃ©es" de la feuille IMPORT
 '
-' TODO : Compléter cette macro pour gérer les cas suivants :
-'   - Validation des données avant import (format de date, statut valide, etc.)
+' TODO : ComplÃ©ter cette macro pour gÃ©rer les cas suivants :
+'   - Validation des donnÃ©es avant import (format de date, statut valide, etc.)
 '   - Gestion des conflits d'ID (doublon avec participant existant)
-'   - Rapport d'import (nombre de lignes importées, ignorées, en erreur)
-'   - Option de mise à jour des participants existants (par opposition à ignorer)
+'   - Rapport d'import (nombre de lignes importÃ©es, ignorÃ©es, en erreur)
+'   - Option de mise Ã  jour des participants existants (par opposition Ã  ignorer)
 ' -----------------------------------------------------------------------------
 Public Sub ImporterDonnees()
     ' =========================================================================
-    ' MACRO PRÉPARÉE — À COMPLÉTER
+    ' MACRO PRÃ‰PARÃ‰E â€” Ã€ COMPLÃ‰TER
     ' =========================================================================
     '
-    ' Le code ci-dessous est une ébauche fonctionnelle de base.
-    ' Pour une utilisation en production, il est recommandé d'ajouter :
-    '   - Une validation complète des données
+    ' Le code ci-dessous est une Ã©bauche fonctionnelle de base.
+    ' Pour une utilisation en production, il est recommandÃ© d'ajouter :
+    '   - Une validation complÃ¨te des donnÃ©es
     '   - Une gestion des erreurs ligne par ligne
-    '   - Un rapport d'import détaillé
+    '   - Un rapport d'import dÃ©taillÃ©
     ' =========================================================================
     
     Dim wsImport As Worksheet
@@ -57,13 +56,13 @@ Public Sub ImporterDonnees()
     
     ' Confirmation avant l'import
     Dim reponse As Integer
-    reponse = MsgBox("Voulez-vous importer les données de la feuille IMPORT vers PARTICIPANTS ?" & vbCrLf & _
-                     "Les participants avec un ID déjà existant seront ignorés.", _
+    reponse = MsgBox("Voulez-vous importer les donnÃ©es de la feuille IMPORT vers PARTICIPANTS ?" & vbCrLf & _
+                     "Les participants avec un ID dÃ©jÃ  existant seront ignorÃ©s.", _
                      vbYesNo + vbQuestion, "Confirmation d'import")
     
     If reponse <> vbYes Then Exit Sub
     
-    ' Accès aux feuilles
+    ' AccÃ¨s aux feuilles
     On Error GoTo ErrImport
     Set wsImport = ThisWorkbook.Sheets("IMPORT")
     Set wsParticipants = ThisWorkbook.Sheets("PARTICIPANTS")
@@ -71,20 +70,20 @@ Public Sub ImporterDonnees()
     Set tblParticipants = wsParticipants.ListObjects("TblParticipants")
     On Error GoTo 0
     
-    ' Vérifier qu'il y a des données à importer
+    ' VÃ©rifier qu'il y a des donnÃ©es Ã  importer
     If tblImport.DataBodyRange Is Nothing Then
-        MsgBox "La feuille IMPORT ne contient aucune donnée à importer.", _
-               vbInformation, "Aucune donnée"
+        MsgBox "La feuille IMPORT ne contient aucune donnÃ©e Ã  importer.", _
+               vbInformation, "Aucune donnÃ©e"
         Exit Sub
     End If
     
-    ' Désprotéger la feuille PARTICIPANTS
+    ' DÃ©sprotÃ©ger la feuille PARTICIPANTS
     wsParticipants.Unprotect Password:=MOT_DE_PASSE
     
-    ' Parcourir chaque ligne à importer
+    ' Parcourir chaque ligne Ã  importer
     For Each ligneImport In tblImport.ListRows
         
-        ' Récupérer l'ID de la ligne à importer
+        ' RÃ©cupÃ©rer l'ID de la ligne Ã  importer
         If Not IsNumeric(ligneImport.Range.Cells(1, 1).Value) Then
             nbIgnores = nbIgnores + 1
             GoTo LigneSuivante
@@ -92,7 +91,7 @@ Public Sub ImporterDonnees()
         
         idImport = CLng(ligneImport.Range.Cells(1, 1).Value)
         
-        ' Vérifier si cet ID existe déjà dans PARTICIPANTS
+        ' VÃ©rifier si cet ID existe dÃ©jÃ  dans PARTICIPANTS
         If IDParticipantExiste(tblParticipants, idImport) Then
             nbIgnores = nbIgnores + 1
             GoTo LigneSuivante
@@ -106,7 +105,7 @@ Public Sub ImporterDonnees()
             nouvelleLigne.Range.Cells(1, j).Value = ligneImport.Range.Cells(1, j).Value
         Next j
         
-        ' Reformater la date si nécessaire
+        ' Reformater la date si nÃ©cessaire
         If nouvelleLigne.Range.Cells(1, 5).Value <> "" Then
             nouvelleLigne.Range.Cells(1, 5).NumberFormat = "DD/MM/YYYY"
         End If
@@ -116,30 +115,30 @@ Public Sub ImporterDonnees()
 LigneSuivante:
     Next ligneImport
     
-    ' Reprotéger la feuille PARTICIPANTS
+    ' ReprotÃ©ger la feuille PARTICIPANTS
     wsParticipants.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
     
     ' Rapport d'import
-    MsgBox "Import terminé !" & vbCrLf & vbCrLf & _
-           "Participants importés : " & nbImportes & vbCrLf & _
-           "Lignes ignorées (ID existant ou invalide) : " & nbIgnores, _
-           vbInformation, "Import terminé"
+    MsgBox "Import terminÃ© !" & vbCrLf & vbCrLf & _
+           "Participants importÃ©s : " & nbImportes & vbCrLf & _
+           "Lignes ignorÃ©es (ID existant ou invalide) : " & nbIgnores, _
+           vbInformation, "Import terminÃ©"
     
     Exit Sub
     
 ErrImport:
     wsParticipants.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
     MsgBox "Erreur lors de l'import : " & Err.Description & vbCrLf & _
-           "Vérifiez que les feuilles IMPORT et PARTICIPANTS existent et contiennent les bons tableaux.", _
+           "VÃ©rifiez que les feuilles IMPORT et PARTICIPANTS existent et contiennent les bons tableaux.", _
            vbCritical, "Erreur d'import"
 End Sub
 
 ' -----------------------------------------------------------------------------
-' IDParticipantExiste : Vérifie si un ID participant existe déjà dans le tableau
-' Paramètres :
+' IDParticipantExiste : VÃ©rifie si un ID participant existe dÃ©jÃ  dans le tableau
+' ParamÃ¨tres :
 '   tblParticipants : Le tableau des participants
-'   id              : L'ID à vérifier
-' Retourne True si l'ID existe déjà
+'   id              : L'ID Ã  vÃ©rifier
+' Retourne True si l'ID existe dÃ©jÃ 
 ' -----------------------------------------------------------------------------
 Private Function IDParticipantExiste(tblParticipants As ListObject, id As Long) As Boolean
     Dim ligne As ListRow
