@@ -84,6 +84,12 @@ Public Function EnregistrerPresences(idAtelier As Long, idsParticipants() As Lon
     ' Recalculer les compteurs de l'atelier
     Call RecalculerNbParticipants(idAtelier)
     
+    ' Recalculer le nombre d'ateliers pour chaque participant concerné
+    Dim j As Integer
+    For j = 0 To UBound(idsParticipants)
+        Call RecalculerNbAteliers(idsParticipants(j))
+    Next j
+    
     ' Mettre Ã  jour les statistiques globales
     Call MettreAJourStats
     

@@ -18,6 +18,8 @@
 '   - TxtEMail       : TextBox — Mail (éditable)
 '   - TxtETelephone  : TextBox — Téléphone (éditable)
 '   - TxtEActivite   : TextBox — Activité (éditable)
+'   - ChkNewsletter   : CheckBox — Accepte la newsletter (éditable)
+'   - TxtNbAteliers   : TextBox  — Nombre d'ateliers participés (lecture seule)
 '
 '   Boutons :
 '   - BtnSauvegarder : CommandButton — Sauvegarder les modifications
@@ -171,6 +173,11 @@ Private Function ChargerDonneesParticipant(idParticipant As Long) As Boolean
                 TxtETelephone.Value = CStr(ligneParticipant.Range.Cells(1, 10).Value)
                 TxtEActivite.Value = CStr(ligneParticipant.Range.Cells(1, 11).Value)
                 
+                ' Newsletter (colonne 12)
+                ChkNewsletter.Value = (CStr(ligneParticipant.Range.Cells(1, 12).Value) = "Oui")
+                ' Nb ateliers participés (colonne 13) — lecture seule
+                TxtNbAteliers.Value = CStr(ligneParticipant.Range.Cells(1, 13).Value)
+                
                 ChargerDonneesParticipant = True
                 Exit Function
             End If
@@ -207,7 +214,8 @@ Private Sub BtnSauvegarder_Click()
         codePostal:=TxtECodePostal.Value, _
         mail:=TxtEMail.Value, _
         telephone:=TxtETelephone.Value, _
-        activite:=TxtEActivite.Value)
+        activite:=TxtEActivite.Value, _
+        newsletter:=IIf(ChkNewsletter.Value, "Oui", "Non"))
     
     If succes Then
         MsgBox "Les modifications ont été sauvegardées avec succès !", vbInformation, "Succès"
@@ -236,6 +244,7 @@ Private Sub DefinirEtatEdition(actif As Boolean)
     TxtEMail.Enabled = actif
     TxtETelephone.Enabled = actif
     TxtEActivite.Enabled = actif
+    ChkNewsletter.Enabled = actif
     BtnSauvegarder.Enabled = actif
 End Sub
 
@@ -253,6 +262,8 @@ Private Sub ViderChampsEdition()
     TxtEMail.Value = ""
     TxtETelephone.Value = ""
     TxtEActivite.Value = ""
+    ChkNewsletter.Value = False
+    TxtNbAteliers.Value = ""
 End Sub
 
 ' -----------------------------------------------------------------------------
