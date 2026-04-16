@@ -1,15 +1,14 @@
-Attribute VB_Name = "ModulePresences"
 ' =============================================================================
 ' Module : ModulePresences
-' Description : Gestion des présences — enregistrement et recalcul
+' Description : Gestion des prÃ©sences â€” enregistrement et recalcul
 ' =============================================================================
 
 ' -----------------------------------------------------------------------------
-' EnregistrerPresences : Enregistre les présences sélectionnées pour un atelier
-' Paramètres :
+' EnregistrerPresences : Enregistre les prÃ©sences sÃ©lectionnÃ©es pour un atelier
+' ParamÃ¨tres :
 '   idAtelier        : L'ID de l'atelier
-'   idsParticipants  : Tableau des IDs des participants sélectionnés
-' Retourne True si succès, False si erreur
+'   idsParticipants  : Tableau des IDs des participants sÃ©lectionnÃ©s
+' Retourne True si succÃ¨s, False si erreur
 ' -----------------------------------------------------------------------------
 Public Function EnregistrerPresences(idAtelier As Long, idsParticipants() As Long) As Boolean
     Dim wsPresences As Worksheet
@@ -23,11 +22,11 @@ Public Function EnregistrerPresences(idAtelier As Long, idsParticipants() As Lon
     EnregistrerPresences = False
     
     If Not IsArray(idsParticipants) Then
-        MsgBox "Aucun participant sélectionné.", vbExclamation, "Sélection vide"
+        MsgBox "Aucun participant sÃ©lectionnÃ©.", vbExclamation, "SÃ©lection vide"
         Exit Function
     End If
     
-    ' Accès aux feuilles et tableaux
+    ' AccÃ¨s aux feuilles et tableaux
     On Error GoTo ErrFeuille
     Set wsPresences = ThisWorkbook.Sheets("PRESENCES")
     Set wsParticipants = ThisWorkbook.Sheets("PARTICIPANTS")
@@ -35,10 +34,10 @@ Public Function EnregistrerPresences(idAtelier As Long, idsParticipants() As Lon
     Set tblParticipants = wsParticipants.ListObjects("TblParticipants")
     On Error GoTo 0
     
-    ' Désprotéger la feuille PRESENCES
+    ' DÃ©sprotÃ©ger la feuille PRESENCES
     wsPresences.Unprotect Password:=MOT_DE_PASSE
     
-    ' Calcul du prochain ID de présence
+    ' Calcul du prochain ID de prÃ©sence
     nouvelID = 1
     If Not tblPresences.DataBodyRange Is Nothing Then
         Dim ligneExist As ListRow
@@ -51,12 +50,12 @@ Public Function EnregistrerPresences(idAtelier As Long, idsParticipants() As Lon
         Next ligneExist
     End If
     
-    ' Pour chaque participant sélectionné
+    ' Pour chaque participant sÃ©lectionnÃ©
     For i = 0 To UBound(idsParticipants)
         Dim idPart As Long
         idPart = idsParticipants(i)
         
-        ' Vérifier que ce participant n'est pas déjà enregistré pour cet atelier
+        ' VÃ©rifier que ce participant n'est pas dÃ©jÃ  enregistrÃ© pour cet atelier
         If Not EstDejaPresent(tblPresences, idAtelier, idPart) Then
             ' Rechercher les infos du participant
             Dim nomPart As String
@@ -64,7 +63,7 @@ Public Function EnregistrerPresences(idAtelier As Long, idsParticipants() As Lon
             Dim statutPart As String
             Call ObtenirInfosParticipant(tblParticipants, idPart, nomPart, prenomPart, statutPart)
             
-            ' Ajouter la ligne de présence
+            ' Ajouter la ligne de prÃ©sence
             Set nouvelleLigne = tblPresences.ListRows.Add
             With nouvelleLigne.Range
                 .Cells(1, 1).Value = nouvelID    ' ID_Presence
@@ -79,13 +78,13 @@ Public Function EnregistrerPresences(idAtelier As Long, idsParticipants() As Lon
         End If
     Next i
     
-    ' Reprotéger la feuille PRESENCES
+    ' ReprotÃ©ger la feuille PRESENCES
     wsPresences.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
     
     ' Recalculer les compteurs de l'atelier
     Call RecalculerNbParticipants(idAtelier)
     
-    ' Mettre à jour les statistiques globales
+    ' Mettre Ã  jour les statistiques globales
     Call MettreAJourStats
     
     EnregistrerPresences = True
@@ -93,18 +92,18 @@ Public Function EnregistrerPresences(idAtelier As Long, idsParticipants() As Lon
     
 ErrFeuille:
     wsPresences.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
-    MsgBox "Erreur d'accès aux feuilles. Vérifiez que PRESENCES et PARTICIPANTS existent.", _
+    MsgBox "Erreur d'accÃ¨s aux feuilles. VÃ©rifiez que PRESENCES et PARTICIPANTS existent.", _
            vbCritical, "Erreur"
     Exit Function
 End Function
 
 ' -----------------------------------------------------------------------------
-' EstDejaPresent : Vérifie si un participant est déjà enregistré pour un atelier
-' Paramètres :
-'   tblPresences  : Le tableau de présences
+' EstDejaPresent : VÃ©rifie si un participant est dÃ©jÃ  enregistrÃ© pour un atelier
+' ParamÃ¨tres :
+'   tblPresences  : Le tableau de prÃ©sences
 '   idAtelier     : L'ID de l'atelier
 '   idParticipant : L'ID du participant
-' Retourne True si déjà présent
+' Retourne True si dÃ©jÃ  prÃ©sent
 ' -----------------------------------------------------------------------------
 Public Function EstDejaPresent(tblPresences As ListObject, idAtelier As Long, _
                                 idParticipant As Long) As Boolean
@@ -126,12 +125,12 @@ Public Function EstDejaPresent(tblPresences As ListObject, idAtelier As Long, _
 End Function
 
 ' -----------------------------------------------------------------------------
-' ObtenirInfosParticipant : Récupère les informations d'un participant par son ID
-' Paramètres :
+' ObtenirInfosParticipant : RÃ©cupÃ¨re les informations d'un participant par son ID
+' ParamÃ¨tres :
 '   tblParticipants : Le tableau des participants
-'   idParticipant   : L'ID recherché
+'   idParticipant   : L'ID recherchÃ©
 '   nom             : (sortie) Le nom du participant
-'   prenom          : (sortie) Le prénom du participant
+'   prenom          : (sortie) Le prÃ©nom du participant
 '   statut          : (sortie) Le statut du participant
 ' -----------------------------------------------------------------------------
 Private Sub ObtenirInfosParticipant(tblParticipants As ListObject, idParticipant As Long, _
@@ -157,9 +156,9 @@ Private Sub ObtenirInfosParticipant(tblParticipants As ListObject, idParticipant
 End Sub
 
 ' -----------------------------------------------------------------------------
-' ObtenirPresencesAtelier : Retourne la liste des IDs participants présents
-' pour un atelier donné
-' Paramètre :
+' ObtenirPresencesAtelier : Retourne la liste des IDs participants prÃ©sents
+' pour un atelier donnÃ©
+' ParamÃ¨tre :
 '   idAtelier : L'ID de l'atelier
 ' Retourne un tableau d'IDs (Long) ou un tableau vide
 ' -----------------------------------------------------------------------------
