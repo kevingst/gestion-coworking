@@ -18,7 +18,7 @@
 ' UserForm_Initialize : Initialisation du formulaire à l'ouverture
 ' -----------------------------------------------------------------------------
 Private Sub UserForm_Initialize()
-    Dim themes As String()
+    Dim themes As Variant
     Dim theme As Variant
     
     ' Remplir la liste des thèmes dans le ComboBox
@@ -78,3 +78,4 @@ Private Sub UserForm_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift
         Unload Me
     End If
 End Sub
+
