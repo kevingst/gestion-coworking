@@ -48,7 +48,7 @@ Private Sub UserForm_Initialize()
     LstPresences.ColumnWidths = "40;150;120;100"
 
     ' Remplir le ComboBox des thèmes
-    Dim themes As String()
+    Dim themes As Variant
     Dim theme As Variant
     themes = ObtenirListeThemes()
     CboTheme.Clear
@@ -569,7 +569,7 @@ Private Sub ChargerDetailsAtelier(idAtelier As Long)
                 Dim dureeRaw As Variant
                 dureeRaw = ligneAtelier.Range.Cells(1, 6).Value
                 If Not IsEmpty(dureeRaw) And IsNumeric(dureeRaw) Then
-                    ' Valeur décimale Excel → convertir en minutes
+                    ' Valeur décimale Excel ? convertir en minutes
                     Dim dureeMin As Long
                     dureeMin = CLng(CDbl(dureeRaw) * 24 * 60)
                     dureeStr = Format(dureeMin \ 60, "00") & ":" & Format(dureeMin Mod 60, "00")
