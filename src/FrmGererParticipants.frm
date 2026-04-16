@@ -40,7 +40,7 @@ Private Sub UserForm_Initialize()
     LstResultats.ColumnWidths = "40;150;120;100"
     
     ' Remplir le ComboBox des statuts
-    Dim statuts As String()
+    Dim statuts As Variant
     Dim statut As Variant
     statuts = ObtenirListeStatuts()
     CboEStatut.Clear
@@ -56,13 +56,6 @@ Private Sub UserForm_Initialize()
     
     ' Mettre le focus sur la recherche
     TxtRecherche.SetFocus
-End Sub
-
-' -----------------------------------------------------------------------------
-' TxtRecherche_Change : Filtrage en temps réel de la liste des participants
-' -----------------------------------------------------------------------------
-Private Sub TxtRecherche_Change()
-    Call LancerRecherche(TxtRecherche.Value)
 End Sub
 
 ' -----------------------------------------------------------------------------
@@ -115,6 +108,13 @@ Private Sub LstResultats_Click()
         Call DefinirEtatEdition(True)
         TxtENom.SetFocus
     End If
+End Sub
+
+' -----------------------------------------------------------------------------
+' TxtRecherche_Change : Filtrage en temps réel de la liste des participants
+' -----------------------------------------------------------------------------
+Private Sub TxtRecherche_Change()
+    Call LancerRecherche(TxtRecherche.Value)
 End Sub
 
 ' -----------------------------------------------------------------------------
@@ -271,3 +271,4 @@ Private Sub UserForm_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift
         Unload Me
     End If
 End Sub
+
