@@ -1,11 +1,8 @@
-Attribute VB_Name = "ThisWorkbook"
 ' =============================================================================
 ' Module : ThisWorkbook
 ' Description : Gestion des événements du classeur (ouverture, fermeture)
 ' =============================================================================
 
-' Mot de passe de protection des feuilles (laisser vide si pas de protection)
-Public Const MOT_DE_PASSE As String = ""
 
 ' -----------------------------------------------------------------------------
 ' Workbook_Open : Exécuté à l'ouverture du fichier
@@ -131,3 +128,4 @@ End Sub
 Public Sub OuvrirFrmGererAteliers()
     FrmGererAteliers.Show
 End Sub
+
