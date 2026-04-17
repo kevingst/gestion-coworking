@@ -133,9 +133,38 @@ ErrFeuille:
 End Function
 
 ' -----------------------------------------------------------------------------
-' ObtenirListeThemes : Retourne le tableau des thÃ¨mes disponibles
+' ObtenirListeThemes : Retourne le tableau des thèmes disponibles
+' Lit les thèmes depuis la feuille CONFIG (colonne A, à partir de A2)
+' Si la feuille CONFIG est introuvable ou vide, retourne des thèmes par défaut
 ' -----------------------------------------------------------------------------
 Public Function ObtenirListeThemes() As String()
+    Dim wsConfig As Worksheet
+    Dim themes() As String
+    Dim nb As Integer
+    Dim i As Integer
+    
+    On Error GoTo ThemesParDefaut
+    Set wsConfig = ThisWorkbook.Sheets("CONFIG")
+    On Error GoTo 0
+    
+    nb = 0
+    i = 2
+    Do While wsConfig.Cells(i, 1).Value <> ""
+        nb = nb + 1
+        i = i + 1
+    Loop
+    
+    If nb = 0 Then GoTo ThemesParDefaut
+    
+    ReDim themes(0 To nb - 1)
+    For i = 0 To nb - 1
+        themes(i) = CStr(wsConfig.Cells(i + 2, 1).Value)
+    Next i
+    
+    ObtenirListeThemes = themes
+    Exit Function
+    
+ThemesParDefaut:
     ObtenirListeThemes = Split(THEMES_ATELIERS, ",")
 End Function
 

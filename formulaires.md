@@ -88,7 +88,7 @@ Ce document décrit la structure exacte de chaque UserForm à créer dans l'édi
 | Name | `FrmNouveauParticipant` |
 | Caption | `Nouveau Participant` |
 | Width | `380` |
-| Height | `440` |
+| Height | `470` |
 | StartUpPosition | `1 - CenterOwner` |
 
 ### Contrôles
@@ -115,12 +115,16 @@ Ce document décrit la structure exacte de chaque UserForm à créer dans l'édi
 | `TxtTelephone` | TextBox | *(vide)* | 130 | 255 | 220 | 22 |
 | `LblActivite` | Label | `Activité :` | 12 | 288 | 110 | 18 |
 | `TxtActivite` | TextBox | *(vide)* | 130 | 285 | 220 | 22 |
-| `BtnEnregistrer` | CommandButton | `Enregistrer` | 60 | 370 | 100 | 30 |
-| `BtnAnnuler` | CommandButton | `Annuler` | 210 | 370 | 100 | 30 |
+| `ChkNewsletter` | CheckBox | `Accepte la newsletter` | 130 | 318 | 220 | 22 |
+| `BtnEnregistrer` | CommandButton | `Enregistrer` | 60 | 400 | 100 | 30 |
+| `BtnAnnuler` | CommandButton | `Annuler` | 210 | 400 | 100 | 30 |
 
 **Propriétés du ComboBox `CboStatut` :**
 - `Style` : `2 - fmStyleDropDownList`
 - Valeurs chargées par `UserForm_Initialize` : `Projet pro`, `Lancé`
+
+**Propriétés de `ChkNewsletter` :**
+- `Value` : `False` par défaut
 
 > **Note** : Le champ `TxtDateContact` est pré-rempli avec la date du jour à l'ouverture du formulaire.
 
@@ -134,7 +138,7 @@ Ce document décrit la structure exacte de chaque UserForm à créer dans l'édi
 | Name | `FrmGererParticipants` |
 | Caption | `Gérer les Participants` |
 | Width | `600` |
-| Height | `560` |
+| Height | `620` |
 | StartUpPosition | `1 - CenterOwner` |
 
 ### Contrôles — Zone de recherche
@@ -142,8 +146,7 @@ Ce document décrit la structure exacte de chaque UserForm à créer dans l'édi
 | Name | Type | Caption/Text | Left | Top | Width | Height |
 |---|---|---|---|---|---|---|
 | `LblRecherche` | Label | `Rechercher (Nom ou Prénom) :` | 12 | 12 | 180 | 18 |
-| `TxtRecherche` | TextBox | *(vide)* | 200 | 9 | 200 | 22 |
-| `BtnRechercher` | CommandButton | `Rechercher` | 410 | 8 | 80 | 24 |
+| `TxtRecherche` | TextBox | *(vide)* | 200 | 9 | 380 | 22 |
 | `LstResultats` | ListBox | *(vide)* | 12 | 42 | 560 | 120 |
 
 **Propriétés de `LstResultats` :**
@@ -176,14 +179,16 @@ Ce document décrit la structure exacte de chaque UserForm à créer dans l'édi
 | `TxtETelephone` | TextBox | *(vide)* | 120 | 421 | 200 | 22 |
 | `LblEActivite` | Label | `Activité :` | 12 | 452 | 100 | 18 |
 | `TxtEActivite` | TextBox | *(vide)* | 120 | 449 | 200 | 22 |
+| `ChkNewsletter` | CheckBox | `Accepte la newsletter` | 120 | 480 | 200 | 22 |
+| `LblNbAteliers` | Label | `Nb ateliers participés :` | 12 | 508 | 100 | 18 |
+| `TxtNbAteliers` | TextBox | *(vide)* | 120 | 505 | 80 | 22 |
 
 ### Contrôles — Boutons d'action
 
 | Name | Type | Caption/Text | Left | Top | Width | Height |
 |---|---|---|---|---|---|---|
-| `BtnModifier` | CommandButton | `Modifier` | 340 | 200 | 100 | 30 |
 | `BtnSauvegarder` | CommandButton | `Sauvegarder` | 340 | 245 | 100 | 30 |
-| `BtnFermer` | CommandButton | `Fermer` | 340 | 490 | 100 | 30 |
+| `BtnFermer` | CommandButton | `Fermer` | 340 | 555 | 100 | 30 |
 
 **Propriétés du ComboBox `CboEStatut` :**
 - `Style` : `2 - fmStyleDropDownList`
@@ -191,9 +196,15 @@ Ce document décrit la structure exacte de chaque UserForm à créer dans l'édi
 
 **Propriétés des TextBox d'édition :**
 - Par défaut, tous les champs d'édition ont `Enabled = False`
-- Ils sont activés (`Enabled = True`) uniquement lorsqu'on clique sur le bouton "Modifier"
+- Ils sont activés (`Enabled = True`) automatiquement au clic sur un participant dans la liste
 
-> **Fonctionnement** : La recherche s'effectue sur Nom et Prénom. Un clic sur "Modifier" charge les informations du participant sélectionné dans les champs éditables. "Sauvegarder" met à jour les données dans la feuille `PARTICIPANTS`.
+**Propriétés de `ChkNewsletter` :**
+- `Enabled = False` par défaut (activé au clic sur un participant)
+
+**Propriétés de `TxtNbAteliers` :**
+- `Enabled = False`, `Locked = True` (lecture seule — calculé automatiquement)
+
+> **Fonctionnement** : La saisie dans `TxtRecherche` filtre la liste des participants en temps réel. Un clic direct sur un participant dans `LstResultats` charge ses informations dans les champs éditables et les active immédiatement (sans bouton "Modifier"). `BtnSauvegarder` met à jour les données dans la feuille `PARTICIPANTS` et recalcule `Nb_Ateliers_Participes`.
 
 ---
 
@@ -314,6 +325,48 @@ Ce document décrit la structure exacte de chaque UserForm à créer dans l'édi
 6. Pour les boutons `BtnSauvegarder`, `BtnSupprimerAtelier`, `BtnSupprimerPresence` : définir `Enabled = False`
 7. Double-cliquer sur le formulaire pour ouvrir la fenêtre de code
 8. Copier-coller le contenu du fichier `src/FrmGererAteliers.frm`
+
+---
+
+## Formulaire 6 : `FrmGererThemes`
+
+**Propriétés du formulaire :**
+| Propriété | Valeur |
+|---|---|
+| Name | `FrmGererThemes` |
+| Caption | `Gérer les Thèmes` |
+| Width | `320` |
+| Height | `340` |
+| StartUpPosition | `1 - CenterOwner` |
+
+### Contrôles
+
+| Name | Type | Caption/Text | Left | Top | Width | Height |
+|---|---|---|---|---|---|---|
+| `LblThemes` | Label | `Thèmes disponibles :` | 12 | 12 | 180 | 18 |
+| `LstThemes` | ListBox | *(vide)* | 12 | 34 | 280 | 160 |
+| `LblNouveauTheme` | Label | `Nouveau thème :` | 12 | 208 | 100 | 18 |
+| `TxtNouveauTheme` | TextBox | *(vide)* | 120 | 205 | 172 | 22 |
+| `BtnAjouter` | CommandButton | `Ajouter` | 12 | 240 | 90 | 28 |
+| `BtnSupprimer` | CommandButton | `Supprimer` | 116 | 240 | 90 | 28 |
+| `BtnFermer` | CommandButton | `Fermer` | 220 | 240 | 72 | 28 |
+
+**Propriétés de `LstThemes` :**
+- `MultiSelect` : `0 - fmMultiSelectSingle`
+
+> **Fonctionnement** : Les thèmes sont lus depuis la feuille `CONFIG` (colonne A, à partir de A2). "Ajouter" écrit le nouveau thème à la première ligne vide de CONFIG (avec vérification des doublons). "Supprimer" supprime la ligne sélectionnée dans CONFIG. La liste est rechargée automatiquement après chaque modification. La touche Échap ferme le formulaire.
+
+### Instructions pour créer le formulaire dans l'éditeur VBA
+
+1. Dans l'éditeur VBA (Alt+F11), menu **Insertion → UserForm**
+2. Dans la fenêtre **Propriétés**, définir :
+   - `Name` : `FrmGererThemes`
+   - `Caption` : `Gérer les Thèmes`
+   - `Width` : `320`
+   - `Height` : `340`
+3. Ajouter les contrôles depuis la **Boîte à outils** en respectant le tableau ci-dessus
+4. Double-cliquer sur le formulaire pour ouvrir la fenêtre de code
+5. Copier-coller le contenu du fichier `src/FrmGererThemes.frm`
 
 ---
 

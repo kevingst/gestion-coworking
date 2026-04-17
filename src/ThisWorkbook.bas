@@ -47,6 +47,30 @@ Public Sub InitialiserFeuilles()
     Call VerifierOuCreerTableau(wsPresences, "TblPresences", _
         Array("ID_Presence", "ID_Atelier", "ID_Participant", "Nom_Participant", "Prenom_Participant", "Statut_Participant"))
     
+    ' Créer la feuille CONFIG si elle n'existe pas encore
+    Dim wsConfig As Worksheet
+    Dim configExiste As Boolean
+    Dim ws As Worksheet
+    configExiste = False
+    For Each ws In ThisWorkbook.Sheets
+        If ws.Name = "CONFIG" Then
+            configExiste = True
+            Exit For
+        End If
+    Next ws
+    If Not configExiste Then
+        Set wsConfig = ThisWorkbook.Sheets.Add
+        wsConfig.Name = "CONFIG"
+        wsConfig.Cells(1, 1).Value = "Themes"
+        Dim defaultThemes() As String
+        defaultThemes = Split(THEMES_ATELIERS, ",")
+        Dim t As Integer
+        For t = 0 To UBound(defaultThemes)
+            wsConfig.Cells(t + 2, 1).Value = Trim(defaultThemes(t))
+        Next t
+        wsConfig.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
+    End If
+    
     MsgBox "Initialisation terminée avec succès !", vbInformation, "Initialisation"
     Exit Sub
     
@@ -127,5 +151,12 @@ End Sub
 ' -----------------------------------------------------------------------------
 Public Sub OuvrirFrmGererAteliers()
     FrmGererAteliers.Show
+End Sub
+
+' -----------------------------------------------------------------------------
+' OuvrirFrmGererThemes : Ouvre le formulaire Gérer Thèmes (pour bouton)
+' -----------------------------------------------------------------------------
+Public Sub OuvrirFrmGererThemes()
+    FrmGererThemes.Show
 End Sub
 

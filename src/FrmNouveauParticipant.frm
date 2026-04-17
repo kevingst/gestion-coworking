@@ -13,6 +13,7 @@
 '   - TxtMail        : TextBox — Adresse mail
 '   - TxtTelephone   : TextBox — Numéro de téléphone
 '   - TxtActivite    : TextBox — Description de l'activité
+'   - ChkNewsletter : CheckBox — Accepte la newsletter
 '   - BtnEnregistrer : CommandButton — Enregistrer
 '   - BtnAnnuler     : CommandButton — Annuler
 '
@@ -62,7 +63,8 @@ Private Sub BtnEnregistrer_Click()
         codePostal:=TxtCodePostal.Value, _
         mail:=TxtMail.Value, _
         telephone:=TxtTelephone.Value, _
-        activite:=TxtActivite.Value)
+        activite:=TxtActivite.Value, _
+        newsletter:=IIf(ChkNewsletter.Value, "Oui", "Non"))
     
     ' Si l'enregistrement a réussi, fermer le formulaire
     If succes Then
