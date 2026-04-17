@@ -165,10 +165,7 @@ Public Function ObtenirListeThemes() As String()
     Exit Function
     
 ThemesParDefaut:
-    ReDim themes(0 To 1)
-    themes(0) = "Administration"
-    themes(1) = "Formation"
-    ObtenirListeThemes = themes
+    ObtenirListeThemes = Split(THEMES_ATELIERS, ",")
 End Function
 
 ' -----------------------------------------------------------------------------
