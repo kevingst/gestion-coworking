@@ -126,7 +126,7 @@ Public Function ModifierParticipant(idParticipant As Long, nom As String, _
                                     dateContact As String, nomEntreprise As String, _
                                     commune As String, codePostal As String, _
                                     mail As String, telephone As String, _
-                                    activite As String) As Boolean
+                                    activite As String, newsletter As String) As Boolean
     Dim wsParticipants As Worksheet
     Dim tblParticipants As ListObject
     Dim ligneParticipant As ListRow
