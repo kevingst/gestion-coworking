@@ -19,13 +19,15 @@ Public Const STATUTS_PARTICIPANTS As String = "Projet pro,Lancé"
 '   mail          : Adresse mail
 '   telephone     : NumÃ©ro de tÃ©lÃ©phone
 '   activite      : Description de l'activitÃ© (texte libre)
+'   newsletter    : Accepte la newsletter ("Oui" ou "Non")
 ' Retourne True si succÃ¨s, False si erreur
 ' -----------------------------------------------------------------------------
 Public Function EnregistrerParticipant(nom As String, prenom As String, _
                                        statut As String, dateContact As String, _
                                        nomEntreprise As String, commune As String, _
                                        codePostal As String, mail As String, _
-                                       telephone As String, activite As String) As Boolean
+                                       telephone As String, activite As String, _
+                                       newsletter As String) As Boolean
     Dim wsParticipants As Worksheet
     Dim tblParticipants As ListObject
     Dim nouvelleDate As Date
@@ -90,6 +92,8 @@ Public Function EnregistrerParticipant(nom As String, prenom As String, _
         .Cells(1, 9).Value = Trim(mail)            ' Mail
         .Cells(1, 10).Value = Trim(telephone)      ' Telephone
         .Cells(1, 11).Value = Trim(activite)       ' Activite
+        .Cells(1, 12).Value = Trim(newsletter)     ' Newsletter
+        .Cells(1, 13).Value = 0                    ' Nb_Ateliers_Participes (initialisé à 0)
     End With
     
     ' ReprotÃ©ger la feuille
@@ -122,7 +126,7 @@ Public Function ModifierParticipant(idParticipant As Long, nom As String, _
                                     dateContact As String, nomEntreprise As String, _
                                     commune As String, codePostal As String, _
                                     mail As String, telephone As String, _
-                                    activite As String) As Boolean
+                                    activite As String, newsletter As String) As Boolean
     Dim wsParticipants As Worksheet
     Dim tblParticipants As ListObject
     Dim ligneParticipant As ListRow
@@ -176,6 +180,7 @@ Public Function ModifierParticipant(idParticipant As Long, nom As String, _
                         .Cells(1, 9).Value = Trim(mail)
                         .Cells(1, 10).Value = Trim(telephone)
                         .Cells(1, 11).Value = Trim(activite)
+                        .Cells(1, 12).Value = Trim(newsletter)
                     End With
                     
                     trouve = True
@@ -332,3 +337,56 @@ Public Function RechercherParticipants(critere As String) As Variant
 ErrRecherche:
     RechercherParticipants = resultats
 End Function
+
+' -----------------------------------------------------------------------------
+' RecalculerNbAteliers : Recalcule le nombre d'ateliers participés pour un
+' participant donné et met à jour la colonne Nb_Ateliers_Participes
+' Paramètre :
+'   idParticipant : L'ID du participant à recalculer
+' -----------------------------------------------------------------------------
+Public Sub RecalculerNbAteliers(idParticipant As Long)
+    Dim wsParticipants As Worksheet
+    Dim wsPresences As Worksheet
+    Dim tblParticipants As ListObject
+    Dim tblPresences As ListObject
+    Dim lignePresence As ListRow
+    Dim ligneParticipant As ListRow
+    Dim nb As Long
+    
+    On Error GoTo ErrRecalcul
+    Set wsParticipants = ThisWorkbook.Sheets("PARTICIPANTS")
+    Set wsPresences = ThisWorkbook.Sheets("PRESENCES")
+    Set tblParticipants = wsParticipants.ListObjects("TblParticipants")
+    Set tblPresences = wsPresences.ListObjects("TblPresences")
+    On Error GoTo 0
+    
+    nb = 0
+    If Not tblPresences.DataBodyRange Is Nothing Then
+        For Each lignePresence In tblPresences.ListRows
+            If IsNumeric(lignePresence.Range.Cells(1, 3).Value) Then
+                If CLng(lignePresence.Range.Cells(1, 3).Value) = idParticipant Then
+                    nb = nb + 1
+                End If
+            End If
+        Next lignePresence
+    End If
+    
+    wsParticipants.Unprotect Password:=MOT_DE_PASSE
+    If Not tblParticipants.DataBodyRange Is Nothing Then
+        For Each ligneParticipant In tblParticipants.ListRows
+            If IsNumeric(ligneParticipant.Range.Cells(1, 1).Value) Then
+                If CLng(ligneParticipant.Range.Cells(1, 1).Value) = idParticipant Then
+                    ligneParticipant.Range.Cells(1, 13).Value = nb
+                    Exit For
+                End If
+            End If
+        Next ligneParticipant
+    End If
+    wsParticipants.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
+    Exit Sub
+    
+ErrRecalcul:
+    On Error Resume Next
+    wsParticipants.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
+    On Error GoTo 0
+End Sub

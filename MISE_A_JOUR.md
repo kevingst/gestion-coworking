@@ -230,3 +230,76 @@ Les ateliers sont désormais triés du plus récent au plus ancien.
 4. VÉRIFIER LE FONCTIONNEMENT
    - Changer le mois en ACCUEIL!B1 → le titre de GraphiqueMois et ses données changent
    - Changer l'année en ACCUEIL!B2 → les deux graphiques se mettent à jour
+
+---
+
+### [2026-04-16] Newsletter, comptage ateliers par participant, gestion des themes
+
+#### Fichiers modifies
+- src/ModuleParticipants.bas — ajout parametre newsletter, RecalculerNbAteliers()
+- src/ModuleAteliers.bas — ObtenirListeThemes() lit depuis CONFIG
+- src/ModulePresences.bas — appel RecalculerNbAteliers() apres enregistrement
+- src/FrmGererParticipants.frm — ajout ChkNewsletter + TxtNbAteliers
+- src/FrmNouveauParticipant.frm — ajout ChkNewsletter
+- src/FrmGererThemes.frm — NOUVEAU formulaire
+
+#### Etapes manuelles dans Excel
+
+1. AJOUTER LES COLONNES DANS TblParticipants (feuille PARTICIPANTS)
+   - Cliquer sur la cellule a droite de la derniere colonne du tableau
+   - Ajouter colonne L : nommer l en-tete "Newsletter"
+   - Ajouter colonne M : nommer l en-tete "Nb_Ateliers_Participes"
+   - Pour les participants existants : remplir Newsletter avec "Non" par defaut
+   - Pour Nb_Ateliers_Participes : laisser vide (sera recalcule)
+
+2. CREER LA FEUILLE CONFIG
+   - Clic droit sur un onglet -> Inserer -> nommer "CONFIG"
+   - En A1 : taper "Themes" (en-tete)
+   - En A2, A3, A4... : saisir les themes un par ligne
+
+3. COLLER LE CODE VBA
+   - Alt+F11 -> ouvrir chaque fichier modifie et remplacer le code
+   - Pour FrmGererThemes : Insertion -> UserForm -> nommer "FrmGererThemes" -> coller le code
+
+4. AJOUTER LES CONTROLES DANS LES FORMULAIRES
+   FrmGererParticipants :
+   - Ajouter une CheckBox nommee "ChkNewsletter" avec Caption "Accepte la newsletter"
+   - Ajouter un TextBox nomme "TxtNbAteliers" avec Enabled=False
+   - Ajouter un Label "Nb ateliers participes :" a cote
+
+   FrmNouveauParticipant :
+   - Ajouter une CheckBox nommee "ChkNewsletter" avec Caption "Accepte la newsletter"
+
+   FrmGererThemes (nouveau formulaire) :
+   - ListBox : "LstThemes"
+   - TextBox : "TxtNouveauTheme"
+   - CommandButton : "BtnAjouter" (Caption "Ajouter")
+   - CommandButton : "BtnSupprimer" (Caption "Supprimer")
+   - CommandButton : "BtnFermer" (Caption "Fermer")
+
+5. RECALCULER LES DONNEES EXISTANTES
+   - Ouvrir la fenetre Execution VBA (Ctrl+G)
+   - Executer MettreAJourStats pour recalculer les stats globales
+   - Pour recalculer Nb_Ateliers_Participes de tous les participants existants,
+     ajouter temporairement cette macro dans un module et l executer :
+     Sub RecalculerTousLesParticipants()
+         Dim ws As Worksheet
+         Dim tbl As ListObject
+         Dim ligne As ListRow
+         Set ws = ThisWorkbook.Sheets("PARTICIPANTS")
+         Set tbl = ws.ListObjects("TblParticipants")
+         For Each ligne In tbl.ListRows
+             If IsNumeric(ligne.Range.Cells(1,1).Value) Then
+                 Call RecalculerNbAteliers(CLng(ligne.Range.Cells(1,1).Value))
+             End If
+         Next ligne
+     End Sub
+
+6. AJOUTER LE BOUTON SUR ACCUEIL (optionnel)
+   - Insertion -> Formes -> Rectangle -> Caption "Gerer les themes"
+   - Clic droit -> Affecter une macro -> taper : OuvrirGererThemes
+   - Dans un module standard, ajouter :
+     Public Sub OuvrirGererThemes()
+         FrmGererThemes.Show
+     End Sub
+
