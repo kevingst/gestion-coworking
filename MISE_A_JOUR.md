@@ -303,3 +303,29 @@ Les ateliers sont désormais triés du plus récent au plus ancien.
          FrmGererThemes.Show
      End Sub
 
+---
+
+### [2026-04-22] Export CSV participants newsletter pour Brevo
+
+#### Fichiers modifiés
+- src/ModuleExport.bas — NOUVEAU module d'export CSV
+
+#### Étapes manuelles dans Excel (à faire une seule fois)
+
+1. COLLER LE CODE VBA
+   - Alt+F11 -> Dans un module standard existant ou nouveau, coller le contenu de src/ModuleExport.bas
+   - Ou : Insertion -> Module -> coller le code -> renommer le module "ModuleExport"
+
+2. AJOUTER LE BOUTON SUR ACCUEIL
+   - Sur la feuille ACCUEIL, Insertion -> Formes -> Rectangle
+   - Saisir le texte : "Exporter contacts Brevo"
+   - Clic droit sur le bouton -> Affecter une macro -> sélectionner "ExporterParticipantsBrevo"
+   - Mettre en forme le bouton selon le style de la feuille
+
+3. UTILISATION
+   - Cliquer sur le bouton "Exporter contacts Brevo"
+   - Choisir l'emplacement de sauvegarde du fichier CSV
+   - Le fichier généré contient les colonnes : EMAIL;PRENOM;NOM;STATUT
+   - Seuls les participants avec Newsletter = "Oui" ET une adresse email renseignée sont exportés
+   - Importer le CSV dans Brevo : Contacts -> Importer des contacts -> Importer un fichier CSV
+
