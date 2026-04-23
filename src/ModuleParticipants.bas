@@ -218,6 +218,78 @@ ErrFeuille:
 End Function
 
 ' -----------------------------------------------------------------------------
+' SupprimerParticipant : Supprime un participant de TblParticipants
+' et toutes ses présences associées dans TblPresences
+' Paramètre :
+'   idParticipant : L'ID du participant à supprimer
+' Retourne True si succès, False si erreur
+' -----------------------------------------------------------------------------
+Public Function SupprimerParticipant(idParticipant As Long) As Boolean
+    Dim wsParticipants As Worksheet
+    Dim wsPresences As Worksheet
+    Dim tblParticipants As ListObject
+    Dim tblPresences As ListObject
+    Dim ligneParticipant As ListRow
+    Dim lignePresence As ListRow
+    Dim lignesASupprimer As Collection
+    Dim i As Integer
+    
+    SupprimerParticipant = False
+    
+    On Error GoTo ErrSuppression
+    Set wsParticipants = ThisWorkbook.Sheets("PARTICIPANTS")
+    Set wsPresences = ThisWorkbook.Sheets("PRESENCES")
+    Set tblParticipants = wsParticipants.ListObjects("TblParticipants")
+    Set tblPresences = wsPresences.ListObjects("TblPresences")
+    On Error GoTo 0
+    
+    ' Supprimer les présences associées d'abord
+    wsPresences.Unprotect Password:=MOT_DE_PASSE
+    Set lignesASupprimer = New Collection
+    If Not tblPresences.DataBodyRange Is Nothing Then
+        For Each lignePresence In tblPresences.ListRows
+            If IsNumeric(lignePresence.Range.Cells(1, 3).Value) Then
+                If CLng(lignePresence.Range.Cells(1, 3).Value) = idParticipant Then
+                    lignesASupprimer.Add lignePresence
+                End If
+            End If
+        Next lignePresence
+        ' Supprimer en sens inverse pour ne pas décaler les indices
+        For i = lignesASupprimer.Count To 1 Step -1
+            lignesASupprimer(i).Delete
+        Next i
+    End If
+    wsPresences.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
+    
+    ' Supprimer le participant
+    wsParticipants.Unprotect Password:=MOT_DE_PASSE
+    If Not tblParticipants.DataBodyRange Is Nothing Then
+        For Each ligneParticipant In tblParticipants.ListRows
+            If IsNumeric(ligneParticipant.Range.Cells(1, 1).Value) Then
+                If CLng(ligneParticipant.Range.Cells(1, 1).Value) = idParticipant Then
+                    ligneParticipant.Delete
+                    Exit For
+                End If
+            End If
+        Next ligneParticipant
+    End If
+    wsParticipants.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
+    
+    ' Recalculer les stats
+    Call MettreAJourStats
+    
+    SupprimerParticipant = True
+    Exit Function
+    
+ErrSuppression:
+    On Error Resume Next
+    wsParticipants.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
+    wsPresences.Protect Password:=MOT_DE_PASSE, UserInterfaceOnly:=True
+    On Error GoTo 0
+    MsgBox "Erreur lors de la suppression du participant.", vbCritical, "Erreur"
+End Function
+
+' -----------------------------------------------------------------------------
 ' MettreAJourStatutPresences : Met Ã  jour le statut dans PRESENCES quand
 ' le statut d'un participant change (pour la cohÃ©rence des donnÃ©es)
 ' ParamÃ¨tres :
