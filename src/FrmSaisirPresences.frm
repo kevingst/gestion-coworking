@@ -21,6 +21,12 @@ Private idAtelierSelectionne As Long
 Private idsCoches() As Long
 Private nbCoches As Long
 
+' Tableau parallèle à LstParticipants : mappe index d'affichage → ID participant
+' Utilisé à la place de LstParticipants.List(idx, 1) pour éviter les problèmes
+' de colonne 0-width (largeur nulle) dans certaines versions de VBA/Excel.
+Private idsParticipantsAffiches() As Long
+Private nbAffiches As Long
+
 ' -----------------------------------------------------------------------------
 ' UserForm_Initialize
 ' -----------------------------------------------------------------------------
@@ -28,6 +34,8 @@ Private Sub UserForm_Initialize()
     idAtelierSelectionne = 0
     nbCoches = 0
     ReDim idsCoches(0)
+    nbAffiches = 0
+    ReDim idsParticipantsAffiches(0)
     Call ChargerListeAteliers("")
     LstParticipants.Clear
 End Sub
@@ -40,6 +48,8 @@ Private Sub TxtRechercheAtelier_Change()
     idAtelierSelectionne = 0
     nbCoches = 0
     ReDim idsCoches(0)
+    nbAffiches = 0
+    ReDim idsParticipantsAffiches(0)
     LstParticipants.Clear
 End Sub
 
@@ -168,10 +178,6 @@ Private Sub LstAteliers_Click()
     Call ChargerListeParticipants(idAtelierSelectionne, "")
 End Sub
 
-' -----------------------------------------------------------------------------
-' ChargerListeParticipants : affiche ☐/☑ selon idsCoches, filtre optionnel
-' 5 colonnes : case(☐/☑), ID(masqué), Nom, Prénom, Statut
-' -----------------------------------------------------------------------------
 Private Sub ChargerListeParticipants(idAtelier As Long, filtre As String)
     Dim wsParticipants As Worksheet
     Dim tblParticipants As ListObject
@@ -179,6 +185,10 @@ Private Sub ChargerListeParticipants(idAtelier As Long, filtre As String)
     Dim idPart As Long
 
     LstParticipants.Clear
+
+    ' Réinitialiser le tableau parallèle
+    nbAffiches = 0
+    ReDim idsParticipantsAffiches(0)
 
     On Error GoTo ErrChargementPart
     Set wsParticipants = ThisWorkbook.Sheets("PARTICIPANTS")
@@ -227,10 +237,15 @@ Private Sub ChargerListeParticipants(idAtelier As Long, filtre As String)
                     LstParticipants.List(i, 3) = prenomPart   ' Col 3 : Prénom
                     LstParticipants.List(i, 4) = ligneParticipant.Range.Cells(1, 4).Value  ' Col 4 : Statut
 
+                    ' Stocker l'ID dans le tableau parallèle (source fiable pour _Click)
+                    ReDim Preserve idsParticipantsAffiches(0 To i)
+                    idsParticipantsAffiches(i) = idPart
+
                     i = i + 1
                 End If
             End If
         Next ligneParticipant
+        nbAffiches = i
     End If
 
     Exit Sub
@@ -241,16 +256,17 @@ End Sub
 
 ' -----------------------------------------------------------------------------
 ' LstParticipants_Click : bascule ☐/☑ au clic
+' L'ID est lu depuis idsParticipantsAffiches() (tableau parallèle) plutôt que
+' depuis LstParticipants.List(idx, 1) (colonne 0-width) pour éviter les
+' problèmes silencieux de lecture sur certaines versions de VBA/Excel.
 ' -----------------------------------------------------------------------------
 Private Sub LstParticipants_Click()
     Dim idx As Long
     idx = LstParticipants.ListIndex
-    If idx < 0 Then Exit Sub
+    If idx < 0 Or idx >= nbAffiches Then Exit Sub
 
     Dim idPart As Long
-    On Error Resume Next
-    idPart = CLng(LstParticipants.List(idx, 1))
-    On Error GoTo 0
+    idPart = idsParticipantsAffiches(idx)
     If idPart <= 0 Then Exit Sub
 
     If EstCoche(idPart) Then
