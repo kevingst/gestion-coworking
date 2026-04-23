@@ -216,9 +216,9 @@ Private Sub ChargerListeParticipants(idAtelier As Long, filtre As String)
                     ' Afficher ☑ si coché, ☐ sinon
                     Dim caseChar As String
                     If EstCoche(idPart) Then
-                        caseChar = Chr(9745)  ' ☑
+                        caseChar = ChrW(9745)  ' ☑
                     Else
-                        caseChar = Chr(9744)  ' ☐
+                        caseChar = ChrW(9744)  ' ☐
                     End If
 
                     LstParticipants.AddItem caseChar          ' Col 0 : case
@@ -255,10 +255,10 @@ Private Sub LstParticipants_Click()
 
     If EstCoche(idPart) Then
         Call RetirerCoche(idPart)
-        LstParticipants.List(idx, 0) = Chr(9744)  ' ☐
+        LstParticipants.List(idx, 0) = ChrW(9744)  ' ☐
     Else
         Call AjouterCoche(idPart)
-        LstParticipants.List(idx, 0) = Chr(9745)  ' ☑
+        LstParticipants.List(idx, 0) = ChrW(9745)  ' ☑
     End If
 End Sub
 
