@@ -8,6 +8,7 @@
 '   - TxtHeureDebut : TextBox — Heure de début (HH:MM)
 '   - TxtHeureFin   : TextBox — Heure de fin (HH:MM)
 '   - CboTheme      : ComboBox — Thème de l'atelier
+'   - TxtAnimePar   : TextBox — Animé par (saisie libre)
 '   - BtnEnregistrer: CommandButton — Enregistrer
 '   - BtnAnnuler    : CommandButton — Annuler
 '
@@ -52,7 +53,8 @@ Private Sub BtnEnregistrer_Click()
         dateStr:=TxtDate.Value, _
         heureDebut:=TxtHeureDebut.Value, _
         heureFin:=TxtHeureFin.Value, _
-        theme:=CboTheme.Value)
+        theme:=CboTheme.Value, _
+        animepar:=TxtAnimePar.Value)
     
     ' Si l'enregistrement a réussi, fermer le formulaire
     If succes Then

@@ -356,3 +356,35 @@ Les ateliers sont désormais triés du plus récent au plus ancien.
    - Propriété MultiSelect : 0 - fmMultiSelectSingle (les cases ☐/☑ gèrent la sélection multiple)
    - Propriété ColumnCount : 5
    - Propriété ColumnWidths : "20;0;150;120;100"
+
+### [2026-04-24] Champ Animé par + mail dans présences
+
+#### Fichiers modifiés
+- src/ModuleAteliers.bas — ajout paramètre `animepar` dans `EnregistrerAtelier()`, écriture en colonne J (Cells(1,10))
+- src/FrmNouvelAtelier.frm — ajout contrôle `TxtAnimePar`, transmission à `EnregistrerAtelier()`
+- src/FrmGererAteliers.frm — chargement/sauvegarde/activation/vidage de `TxtAnimePar`, `LstPresences` passe à 5 colonnes avec affichage du mail
+
+#### Étapes manuelles dans Excel
+
+1. AJOUTER LA COLONNE ANIME_PAR DANS TblAteliers (feuille ATELIERS)
+   - Cliquer sur la cellule à droite de la dernière colonne du tableau TblAteliers
+   - Ajouter la colonne J : nommer l'en-tête "Anime_Par"
+   - Pour les ateliers existants, laisser vide (ou renseigner si connu)
+
+2. AJOUTER TxtAnimePar DANS FrmNouvelAtelier
+   - Ouvrir FrmNouvelAtelier dans l'éditeur de formulaire (Alt+F11)
+   - Ajouter un TextBox nommé "TxtAnimePar"
+   - Ajouter un Label "Animé par :" à côté
+   - Remplacer le code VBA (clic droit → Visualiser le code, Ctrl+A, coller src/FrmNouvelAtelier.frm)
+
+3. AJOUTER TxtAnimePar DANS FrmGererAteliers
+   - Ouvrir FrmGererAteliers dans l'éditeur de formulaire
+   - Ajouter un TextBox nommé "TxtAnimePar" dans la zone de détail de l'atelier
+   - Ajouter un Label "Animé par :" à côté
+   - Remplacer le code VBA (clic droit → Visualiser le code, Ctrl+A, coller src/FrmGererAteliers.frm)
+
+4. METTRE À JOUR LstPresences DANS FrmGererAteliers
+   - Dans le designer de FrmGererAteliers, sélectionner LstPresences
+   - Propriété ColumnCount : 5
+   - Propriété ColumnWidths : "40;150;120;100;180"
+   - (Le code VBA définit ces valeurs automatiquement à l'initialisation)

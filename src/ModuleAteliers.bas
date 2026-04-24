@@ -14,11 +14,12 @@ Public Const THEMES_ATELIERS As String = "Administration,Réseautage,Création,N
 '   heureDebut : Heure de dÃ©but au format HH:MM
 '   heureFin   : Heure de fin au format HH:MM
 '   theme      : ThÃ¨me de l'atelier
+'   animepar   : Nom de l'animateur de l'atelier
 ' Retourne True si succÃ¨s, False si erreur
 ' -----------------------------------------------------------------------------
 Public Function EnregistrerAtelier(nom As String, dateStr As String, _
                                    heureDebut As String, heureFin As String, _
-                                   theme As String) As Boolean
+                                   theme As String, animepar As String) As Boolean
     Dim wsAteliers As Worksheet
     Dim tblAteliers As ListObject
     Dim nouvelleDate As Date
@@ -105,6 +106,7 @@ Public Function EnregistrerAtelier(nom As String, dateStr As String, _
         .Cells(1, 7).Value = Trim(theme)         ' Theme
         .Cells(1, 8).Value = 0                   ' Nb_Participants (initialisÃ© Ã  0)
         .Cells(1, 9).Value = 0                   ' Nb_Participants_Pro (initialisÃ© Ã  0)
+        .Cells(1, 10).Value = Trim(animepar)     ' Anime_Par
     End With
     
     ' ReprotÃ©ger la feuille

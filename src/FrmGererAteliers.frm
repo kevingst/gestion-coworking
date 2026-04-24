@@ -17,9 +17,10 @@
 '   - CboTheme            : ComboBox — Thème de l'atelier (éditable)
 '   - TxtNbParticipants   : TextBox — Nombre de participants (lecture seule)
 '   - TxtNbParticipantsPro: TextBox — Nombre de participants pro (lecture seule)
+'   - TxtAnimePar        : TextBox — Animé par (saisie libre)
 '
 '   Zone des présences :
-'   - LstPresences        : ListBox — Participants présents (ColumnCount=4 : ID, Nom, Prénom, Statut)
+'   - LstPresences        : ListBox — Participants présents (ColumnCount=5 : ID, Nom, Prénom, Statut, Mail)
 '
 '   Boutons d'action :
 '   - BtnSauvegarder      : CommandButton — Sauvegarder les modifications de l'atelier
@@ -44,8 +45,8 @@ Private Sub UserForm_Initialize()
     LstAteliers.ColumnWidths = "40;200;80;120"
 
     ' Configurer la ListBox des présences
-    LstPresences.ColumnCount = 4
-    LstPresences.ColumnWidths = "40;150;120;100"
+    LstPresences.ColumnCount = 5
+    LstPresences.ColumnWidths = "40;150;120;100;180"
 
     ' Remplir le ComboBox des thèmes
     Dim themes As Variant
@@ -173,6 +174,7 @@ Private Sub BtnSauvegarder_Click()
                     ligneAtelier.Range.Cells(1, 6).Value = dureeFormatee               ' Duree
                     ligneAtelier.Range.Cells(1, 6).NumberFormat = "@"  ' Texte pour forcer le stockage en HH:MM texte
                     ligneAtelier.Range.Cells(1, 7).Value = CboTheme.Value              ' Theme
+                    ligneAtelier.Range.Cells(1, 10).Value = Trim(TxtAnimePar.Value) ' Anime_Par
                     trouve = True
                     Exit For
                 End If
@@ -592,6 +594,7 @@ Private Sub ChargerDetailsAtelier(idAtelier As Long)
 
                 TxtNbParticipants.Value = CStr(ligneAtelier.Range.Cells(1, 8).Value)
                 TxtNbParticipantsPro.Value = CStr(ligneAtelier.Range.Cells(1, 9).Value)
+                TxtAnimePar.Value = CStr(ligneAtelier.Range.Cells(1, 10).Value)
                 Exit For
             End If
         End If
@@ -610,29 +613,61 @@ End Sub
 ' -----------------------------------------------------------------------------
 Private Sub ChargerPresencesAtelier(idAtelier As Long)
     Dim wsPresences As Worksheet
+    Dim wsParticipants As Worksheet
     Dim tblPresences As ListObject
+    Dim tblParticipants As ListObject
     Dim lignePresence As ListRow
+    Dim ligneParticipant As ListRow
+    Dim dictMails As Object
+    Dim mailPart As String
+    Dim compteur As Long
 
     LstPresences.Clear
 
     On Error GoTo ErrPresences
     Set wsPresences = ThisWorkbook.Sheets("PRESENCES")
+    Set wsParticipants = ThisWorkbook.Sheets("PARTICIPANTS")
     Set tblPresences = wsPresences.ListObjects("TblPresences")
+    Set tblParticipants = wsParticipants.ListObjects("TblParticipants")
     On Error GoTo 0
 
     If tblPresences.DataBodyRange Is Nothing Then Exit Sub
 
+    ' Construire un dictionnaire ID_Participant -> Mail pour une recherche en O(1)
+    Set dictMails = CreateObject("Scripting.Dictionary")
+    If Not tblParticipants.DataBodyRange Is Nothing Then
+        For Each ligneParticipant In tblParticipants.ListRows
+            If IsNumeric(ligneParticipant.Range.Cells(1, 1).Value) Then
+                dictMails(CLng(ligneParticipant.Range.Cells(1, 1).Value)) = _
+                    CStr(ligneParticipant.Range.Cells(1, 9).Value)
+            End If
+        Next ligneParticipant
+    End If
+
+    compteur = 0
     For Each lignePresence In tblPresences.ListRows
         If IsNumeric(lignePresence.Range.Cells(1, 2).Value) Then
             If CLng(lignePresence.Range.Cells(1, 2).Value) = idAtelier Then
                 ' Colonne 3 = ID_Participant
-                LstPresences.AddItem CStr(lignePresence.Range.Cells(1, 3).Value)
-                LstPresences.List(LstPresences.ListCount - 1, 1) = _
-                    CStr(lignePresence.Range.Cells(1, 4).Value)  ' Nom_Participant
-                LstPresences.List(LstPresences.ListCount - 1, 2) = _
-                    CStr(lignePresence.Range.Cells(1, 5).Value)  ' Prenom_Participant
-                LstPresences.List(LstPresences.ListCount - 1, 3) = _
-                    CStr(lignePresence.Range.Cells(1, 6).Value)  ' Statut_Participant
+                LstPresences.AddItem CStr(lignePresence.Range.Cells(1, 3).Value)  ' col0 : ID
+                LstPresences.List(compteur, 1) = _
+                    CStr(lignePresence.Range.Cells(1, 4).Value)  ' col1 : Nom_Participant
+                LstPresences.List(compteur, 2) = _
+                    CStr(lignePresence.Range.Cells(1, 5).Value)  ' col2 : Prenom_Participant
+                LstPresences.List(compteur, 3) = _
+                    CStr(lignePresence.Range.Cells(1, 6).Value)  ' col3 : Statut_Participant
+
+                ' Récupérer le mail depuis le dictionnaire (O(1))
+                Dim idPart As Long
+                idPart = CLng(lignePresence.Range.Cells(1, 3).Value)
+                If dictMails.Exists(idPart) Then
+                    mailPart = CStr(dictMails(idPart))
+                Else
+                    mailPart = ""
+                End If
+                LstPresences.List(compteur, 4) = mailPart  ' col4 : Mail
+
+                compteur = compteur + 1
             End If
         End If
     Next lignePresence
@@ -687,6 +722,7 @@ Private Sub DefinirEtatChamps(actif As Boolean)
     TxtHeureDebut.Enabled = actif
     TxtHeureFin.Enabled = actif
     CboTheme.Enabled = actif
+    TxtAnimePar.Enabled = actif
     BtnSauvegarder.Enabled = actif
     BtnSupprimerAtelier.Enabled = actif
     BtnSupprimerPresence.Enabled = actif
@@ -704,6 +740,7 @@ Private Sub ViderChampsDetail()
     CboTheme.ListIndex = -1
     TxtNbParticipants.Value = ""
     TxtNbParticipantsPro.Value = ""
+    TxtAnimePar.Value = ""
 End Sub
 
 ' -----------------------------------------------------------------------------
