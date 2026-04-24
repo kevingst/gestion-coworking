@@ -27,6 +27,10 @@ Private nbCoches As Long
 Private idsParticipantsAffiches() As Long
 Private nbAffiches As Long
 
+' Garde-fou contre la récursion : LstParticipants_Click se redéclenche quand
+' on restaure ListIndex après rechargement — ce flag coupe la boucle.
+Private bCharging As Boolean
+
 ' -----------------------------------------------------------------------------
 ' UserForm_Initialize
 ' -----------------------------------------------------------------------------
@@ -256,11 +260,19 @@ End Sub
 
 ' -----------------------------------------------------------------------------
 ' LstParticipants_Click : bascule ☐/☑ au clic
-' L'ID est lu depuis idsParticipantsAffiches() (tableau parallèle) plutôt que
-' depuis LstParticipants.List(idx, 1) (colonne 0-width) pour éviter les
-' problèmes silencieux de lecture sur certaines versions de VBA/Excel.
+'
+' Pourquoi on recharge la liste entière ?
+' Excel/VBA ne rafraîchit pas visuellement la colonne 0 d'une ListBox quand on
+' écrit LstParticipants.List(idx, 0) = "..." (bug connu sur la première colonne
+' remplie via AddItem). La seule façon fiable de mettre à jour le symbole ☐/☑
+' est de reconstruire la liste. L'état des coches est dans idsCoches() qui
+' persiste, donc ChargerListeParticipants affichera le bon symbole.
+'
+' bCharging évite la récursion : restaurer ListIndex déclenche un nouveau _Click.
 ' -----------------------------------------------------------------------------
 Private Sub LstParticipants_Click()
+    If bCharging Then Exit Sub
+
     Dim idx As Long
     idx = LstParticipants.ListIndex
     If idx < 0 Or idx >= nbAffiches Then Exit Sub
@@ -271,11 +283,23 @@ Private Sub LstParticipants_Click()
 
     If EstCoche(idPart) Then
         Call RetirerCoche(idPart)
-        LstParticipants.List(idx, 0) = ChrW(9744)  ' ☐
     Else
         Call AjouterCoche(idPart)
-        LstParticipants.List(idx, 0) = ChrW(9745)  ' ☑
     End If
+
+    ' Recharger la liste pour que le symbole ☐/☑ soit bien mis à jour
+    Dim topIdx As Long
+    topIdx = LstParticipants.TopIndex
+
+    bCharging = True
+    Call ChargerListeParticipants(idAtelierSelectionne, TxtRechercheParticipant.Value)
+    If topIdx < LstParticipants.ListCount Then
+        LstParticipants.TopIndex = topIdx
+    End If
+    If idx < LstParticipants.ListCount Then
+        LstParticipants.ListIndex = idx
+    End If
+    bCharging = False
 End Sub
 
 ' -----------------------------------------------------------------------------
