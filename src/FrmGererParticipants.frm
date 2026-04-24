@@ -245,6 +245,7 @@ Private Sub DefinirEtatEdition(actif As Boolean)
     TxtETelephone.Enabled = actif
     TxtEActivite.Enabled = actif
     ChkNewsletter.Enabled = actif
+    BtnSupprimer.Enabled = actif
     BtnSauvegarder.Enabled = actif
 End Sub
 
@@ -264,6 +265,38 @@ Private Sub ViderChampsEdition()
     TxtEActivite.Value = ""
     ChkNewsletter.Value = False
     TxtNbAteliers.Value = ""
+End Sub
+
+' -----------------------------------------------------------------------------
+' BtnSupprimer_Click : Suppression du participant sélectionné
+' -----------------------------------------------------------------------------
+Private Sub BtnSupprimer_Click()
+    If idParticipantSelectionne <= 0 Then
+        MsgBox "Aucun participant sélectionné.", vbExclamation, "Erreur"
+        Exit Sub
+    End If
+    
+    ' Récupérer le nom pour le message de confirmation
+    Dim nomAffiche As String
+    nomAffiche = TxtENom.Value & " " & TxtEPrenom.Value
+    
+    Dim reponse As Integer
+    reponse = MsgBox("Supprimer le participant """ & Trim(nomAffiche) & """ ?" & vbCrLf & _
+                     "Toutes ses présences seront également supprimées.", _
+                     vbYesNo + vbQuestion, "Confirmation de suppression")
+    
+    If reponse <> vbYes Then Exit Sub
+    
+    Dim succes As Boolean
+    succes = SupprimerParticipant(idParticipantSelectionne)
+    
+    If succes Then
+        MsgBox "Le participant a été supprimé avec succès.", vbInformation, "Suppression réussie"
+        idParticipantSelectionne = 0
+        Call DefinirEtatEdition(False)
+        Call ViderChampsEdition
+        Call LancerRecherche(TxtRecherche.Value)
+    End If
 End Sub
 
 ' -----------------------------------------------------------------------------

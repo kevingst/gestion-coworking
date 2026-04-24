@@ -329,3 +329,30 @@ Les ateliers sont désormais triés du plus récent au plus ancien.
    - Seuls les participants avec Newsletter = "Oui" ET une adresse email renseignée sont exportés
    - Importer le CSV dans Brevo : Contacts -> Importer des contacts -> Importer un fichier CSV
 
+
+### [2026-04-23] Suppression participant, cases à cocher présences, recalcul auto nb ateliers
+
+#### Fichiers modifiés
+- src/ModuleParticipants.bas — ajout SupprimerParticipant()
+- src/FrmGererParticipants.frm — ajout BtnSupprimer + BtnSupprimer_Click()
+- src/FrmSaisirPresences.frm — réécriture complète avec cases ☐/☑ persistantes
+- src/ModulePresences.bas — vérification appel RecalculerNbAteliers()
+
+#### Étapes manuelles dans Excel
+
+1. COLLER LE CODE VBA
+   - Alt+F11 → remplacer le code de chaque fichier modifié
+
+2. AJOUTER LE BOUTON SUPPRIMER DANS FrmGererParticipants
+   - Ouvrir FrmGererParticipants dans l'éditeur de formulaire
+   - Ajouter un CommandButton nommé "BtnSupprimer"
+   - Caption : "Supprimer"
+   - Enabled : False (sera activé automatiquement à la sélection d'un participant)
+   - Placer le bouton à côté de BtnSauvegarder
+
+3. MODIFIER LstParticipants DANS FrmSaisirPresences
+   - Ouvrir FrmSaisirPresences dans l'éditeur de formulaire
+   - Sélectionner LstParticipants
+   - Propriété MultiSelect : 0 - fmMultiSelectSingle (les cases ☐/☑ gèrent la sélection multiple)
+   - Propriété ColumnCount : 5
+   - Propriété ColumnWidths : "20;0;150;120;100"

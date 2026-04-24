@@ -6,40 +6,59 @@
 '   - TxtRechercheAtelier     : TextBox — Recherche filtrée en temps réel dans LstAteliers
 '   - LstAteliers             : ListBox — Liste des ateliers (ColumnCount=3)
 '   - TxtRechercheParticipant : TextBox — Recherche filtrée en temps réel dans LstParticipants
-'   - LstParticipants         : ListBox — Liste des participants (MultiSelect, ColumnCount=4)
+'   - LstParticipants         : ListBox — Liste des participants (ColumnCount=4)
+'                               Col 0 : ☐/☑  Col 1 : ID (masqué)  Col 2 : Nom  Col 3 : Prénom  Col 4: Statut
 '   - BtnValider              : CommandButton — Valider les présences
 '   - BtnAnnuler              : CommandButton — Annuler
 '
 ' Voir formulaires.md pour les propriétés détaillées de chaque contrôle.
 ' =============================================================================
 
-' Variable pour stocker l'ID de l'atelier actuellement sélectionné
+' ID de l'atelier sélectionné
 Private idAtelierSelectionne As Long
 
+' Tableau des IDs participants cochés (persiste entre les filtrages)
+Private idsCoches() As Long
+Private nbCoches As Long
+
+' Tableau parallèle à LstParticipants : mappe index d'affichage → ID participant
+' Utilisé à la place de LstParticipants.List(idx, 1) pour éviter les problèmes
+' de colonne 0-width (largeur nulle) dans certaines versions de VBA/Excel.
+Private idsParticipantsAffiches() As Long
+Private nbAffiches As Long
+
+' Garde-fou contre la récursion : LstParticipants_Click se redéclenche quand
+' on restaure ListIndex après rechargement — ce flag coupe la boucle.
+Private bCharging As Boolean
+
 ' -----------------------------------------------------------------------------
-' UserForm_Initialize : Initialisation du formulaire à l'ouverture
+' UserForm_Initialize
 ' -----------------------------------------------------------------------------
 Private Sub UserForm_Initialize()
     idAtelierSelectionne = 0
-
-    ' Charger la liste des ateliers (triés par date décroissante)
+    nbCoches = 0
+    ReDim idsCoches(0)
+    nbAffiches = 0
+    ReDim idsParticipantsAffiches(0)
     Call ChargerListeAteliers("")
-
-    ' Vider la liste des participants (sera chargée à la sélection d'un atelier)
     LstParticipants.Clear
 End Sub
 
 ' -----------------------------------------------------------------------------
-' TxtRechercheAtelier_Change : Filtrage en temps réel de la liste des ateliers
+' TxtRechercheAtelier_Change
 ' -----------------------------------------------------------------------------
 Private Sub TxtRechercheAtelier_Change()
     Call ChargerListeAteliers(TxtRechercheAtelier.Value)
     idAtelierSelectionne = 0
+    nbCoches = 0
+    ReDim idsCoches(0)
+    nbAffiches = 0
+    ReDim idsParticipantsAffiches(0)
     LstParticipants.Clear
 End Sub
 
 ' -----------------------------------------------------------------------------
-' TxtRechercheParticipant_Change : Filtrage en temps réel de la liste des participants
+' TxtRechercheParticipant_Change
 ' -----------------------------------------------------------------------------
 Private Sub TxtRechercheParticipant_Change()
     If idAtelierSelectionne > 0 Then
@@ -48,9 +67,7 @@ Private Sub TxtRechercheParticipant_Change()
 End Sub
 
 ' -----------------------------------------------------------------------------
-' ChargerListeAteliers : Charge les ateliers dans LstAteliers (tri par date décroissante)
-' Paramètre :
-'   filtre : Texte de filtre sur le nom (vide = tous)
+' ChargerListeAteliers : tri par date décroissante, filtre optionnel
 ' -----------------------------------------------------------------------------
 Private Sub ChargerListeAteliers(filtre As String)
     Dim wsAteliers As Worksheet
@@ -64,13 +81,11 @@ Private Sub ChargerListeAteliers(filtre As String)
     Set tblAteliers = wsAteliers.ListObjects("TblAteliers")
     On Error GoTo 0
 
-    ' Configurer les colonnes de la ListBox
     LstAteliers.ColumnCount = 3
     LstAteliers.ColumnWidths = "40;180;100"
 
     If tblAteliers.DataBodyRange Is Nothing Then Exit Sub
 
-    ' Collecter les lignes correspondant au filtre
     Dim nb As Long
     nb = 0
     For Each ligneAtelier In tblAteliers.ListRows
@@ -83,7 +98,6 @@ Private Sub ChargerListeAteliers(filtre As String)
 
     If nb = 0 Then Exit Sub
 
-    ' Construire un tableau temporaire pour le tri
     Dim donnees() As Variant
     ReDim donnees(0 To nb - 1, 0 To 2)
     Dim dates() As Date
@@ -94,21 +108,15 @@ Private Sub ChargerListeAteliers(filtre As String)
     For Each ligneAtelier In tblAteliers.ListRows
         nomAtelier = CStr(ligneAtelier.Range.Cells(1, 2).Value)
         If filtre = "" Or InStr(1, nomAtelier, filtre, vbTextCompare) > 0 Then
-            donnees(idx, 0) = ligneAtelier.Range.Cells(1, 1).Value  ' ID
-            donnees(idx, 1) = nomAtelier                             ' Nom
-            ' Date formatée en JJ/MM/AAAA
+            donnees(idx, 0) = ligneAtelier.Range.Cells(1, 1).Value
+            donnees(idx, 1) = nomAtelier
             Dim dateVal As String
             dateVal = ""
             On Error Resume Next
             dateVal = Format(CDate(ligneAtelier.Range.Cells(1, 3).Value), "DD/MM/YYYY")
-            On Error GoTo 0
-            donnees(idx, 2) = dateVal                                ' Date
-
-            ' Stocker la date brute pour le tri
-            On Error Resume Next
             dates(idx) = CDate(ligneAtelier.Range.Cells(1, 3).Value)
             On Error GoTo 0
-
+            donnees(idx, 2) = dateVal
             idx = idx + 1
         End If
     Next ligneAtelier
@@ -120,11 +128,9 @@ Private Sub ChargerListeAteliers(filtre As String)
     For k = 0 To nb - 2
         For m = 0 To nb - 2 - k
             If dates(m) < dates(m + 1) Then
-                ' Échanger les dates
                 tempDate = dates(m)
                 dates(m) = dates(m + 1)
                 dates(m + 1) = tempDate
-                ' Échanger les données
                 Dim col As Long
                 For col = 0 To 2
                     tempDonnees(col) = donnees(m, col)
@@ -135,7 +141,6 @@ Private Sub ChargerListeAteliers(filtre As String)
         Next m
     Next k
 
-    ' Remplir la ListBox
     For idx = 0 To nb - 1
         LstAteliers.AddItem donnees(idx, 0)
         LstAteliers.List(LstAteliers.ListCount - 1, 1) = donnees(idx, 1)
@@ -149,10 +154,9 @@ ErrChargement:
 End Sub
 
 ' -----------------------------------------------------------------------------
-' LstAteliers_Click : Chargement des participants quand un atelier est sélectionné
+' LstAteliers_Click
 ' -----------------------------------------------------------------------------
 Private Sub LstAteliers_Click()
-    ' Récupérer l'ID de l'atelier sélectionné (première colonne)
     If LstAteliers.ListIndex < 0 Then Exit Sub
 
     On Error Resume Next
@@ -161,43 +165,44 @@ Private Sub LstAteliers_Click()
 
     If idAtelierSelectionne <= 0 Then Exit Sub
 
-    ' Charger la liste des participants pour cet atelier
+    ' Réinitialiser les coches et pré-cocher les présences existantes
+    nbCoches = 0
+    ReDim idsCoches(0)
+
+    ' Pré-cocher les participants déjà présents
+    Dim presencesExistantes() As Long
+    presencesExistantes = ObtenirPresencesAtelier(idAtelierSelectionne)
+    Dim p As Integer
+    For p = 0 To UBound(presencesExistantes)
+        If presencesExistantes(p) > 0 Then
+            Call AjouterCoche(presencesExistantes(p))
+        End If
+    Next p
+
     Call ChargerListeParticipants(idAtelierSelectionne, "")
 End Sub
 
-' -----------------------------------------------------------------------------
-' ChargerListeParticipants : Charge les participants dans LstParticipants
-' en pré-cochant ceux déjà présents à l'atelier, avec filtre optionnel
-' Paramètres :
-'   idAtelier : L'ID de l'atelier sélectionné
-'   filtre    : Texte de filtre sur Nom ou Prénom (vide = tous)
-' -----------------------------------------------------------------------------
 Private Sub ChargerListeParticipants(idAtelier As Long, filtre As String)
     Dim wsParticipants As Worksheet
     Dim tblParticipants As ListObject
-    Dim tblPresences As ListObject
-    Dim wsPresences As Worksheet
     Dim ligneParticipant As ListRow
     Dim idPart As Long
 
     LstParticipants.Clear
 
+    ' Réinitialiser le tableau parallèle
+    nbAffiches = 0
+    ReDim idsParticipantsAffiches(0)
+
     On Error GoTo ErrChargementPart
     Set wsParticipants = ThisWorkbook.Sheets("PARTICIPANTS")
     Set tblParticipants = wsParticipants.ListObjects("TblParticipants")
-    Set wsPresences = ThisWorkbook.Sheets("PRESENCES")
-    Set tblPresences = wsPresences.ListObjects("TblPresences")
     On Error GoTo 0
 
-    ' Configurer les colonnes (ID masqué en col 0, Nom, Prénom, Statut)
-    LstParticipants.ColumnCount = 4
-    LstParticipants.ColumnWidths = "0;150;120;100"
+    ' 5 colonnes : ☐/☑ | ID masqué | Nom | Prénom | Statut
+    LstParticipants.ColumnCount = 5
+    LstParticipants.ColumnWidths = "20;0;150;120;100"
 
-    ' Obtenir la liste des participants déjà présents à cet atelier
-    Dim presencesExistantes() As Long
-    presencesExistantes = ObtenirPresencesAtelier(idAtelier)
-
-    ' Ajouter chaque participant filtré (ID masqué, Nom, Prénom, Statut)
     If Not tblParticipants.DataBodyRange Is Nothing Then
         Dim i As Integer
         i = 0
@@ -208,7 +213,6 @@ Private Sub ChargerListeParticipants(idAtelier As Long, filtre As String)
             On Error GoTo 0
 
             If idPart > 0 Then
-                ' Appliquer le filtre sur Nom ou Prénom
                 Dim nomPart As String
                 Dim prenomPart As String
                 nomPart = CStr(ligneParticipant.Range.Cells(1, 2).Value)
@@ -223,20 +227,29 @@ Private Sub ChargerListeParticipants(idAtelier As Long, filtre As String)
                 End If
 
                 If inclure Then
-                    LstParticipants.AddItem idPart                                          ' ID (masqué)
-                    LstParticipants.List(i, 1) = nomPart                                    ' Nom
-                    LstParticipants.List(i, 2) = prenomPart                                 ' Prénom
-                    LstParticipants.List(i, 3) = ligneParticipant.Range.Cells(1, 4).Value  ' Statut
-
-                    ' Pré-cocher si déjà présent
-                    If EstDansTableau(presencesExistantes, idPart) Then
-                        LstParticipants.Selected(i) = True
+                    ' Afficher ☑ si coché, ☐ sinon
+                    Dim caseChar As String
+                    If EstCoche(idPart) Then
+                        caseChar = ChrW(9745)  ' ☑
+                    Else
+                        caseChar = ChrW(9744)  ' ☐
                     End If
+
+                    LstParticipants.AddItem caseChar          ' Col 0 : case
+                    LstParticipants.List(i, 1) = idPart       ' Col 1 : ID (masqué)
+                    LstParticipants.List(i, 2) = nomPart      ' Col 2 : Nom
+                    LstParticipants.List(i, 3) = prenomPart   ' Col 3 : Prénom
+                    LstParticipants.List(i, 4) = ligneParticipant.Range.Cells(1, 4).Value  ' Col 4 : Statut
+
+                    ' Stocker l'ID dans le tableau parallèle (source fiable pour _Click)
+                    ReDim Preserve idsParticipantsAffiches(0 To i)
+                    idsParticipantsAffiches(i) = idPart
 
                     i = i + 1
                 End If
             End If
         Next ligneParticipant
+        nbAffiches = i
     End If
 
     Exit Sub
@@ -246,65 +259,121 @@ ErrChargementPart:
 End Sub
 
 ' -----------------------------------------------------------------------------
-' EstDansTableau : Vérifie si une valeur est présente dans un tableau Long
+' LstParticipants_Click : bascule ☐/☑ au clic
+'
+' Pourquoi on recharge la liste entière ?
+' Excel/VBA ne rafraîchit pas visuellement la colonne 0 d'une ListBox quand on
+' écrit LstParticipants.List(idx, 0) = "..." (bug connu sur la première colonne
+' remplie via AddItem). La seule façon fiable de mettre à jour le symbole ☐/☑
+' est de reconstruire la liste. L'état des coches est dans idsCoches() qui
+' persiste, donc ChargerListeParticipants affichera le bon symbole.
+'
+' bCharging évite la récursion : restaurer ListIndex déclenche un nouveau _Click.
 ' -----------------------------------------------------------------------------
-Private Function EstDansTableau(tableau() As Long, valeur As Long) As Boolean
-    Dim i As Integer
-    EstDansTableau = False
+Private Sub LstParticipants_Click()
+    If bCharging Then Exit Sub
 
-    On Error Resume Next
-    If UBound(tableau) < 0 Then Exit Function
-    On Error GoTo 0
+    Dim idx As Long
+    idx = LstParticipants.ListIndex
+    If idx < 0 Or idx >= nbAffiches Then Exit Sub
 
-    For i = 0 To UBound(tableau)
-        If tableau(i) = valeur Then
-            EstDansTableau = True
+    Dim idPart As Long
+    idPart = idsParticipantsAffiches(idx)
+    If idPart <= 0 Then Exit Sub
+
+    If EstCoche(idPart) Then
+        Call RetirerCoche(idPart)
+    Else
+        Call AjouterCoche(idPart)
+    End If
+
+    ' Recharger la liste pour que le symbole ☐/☑ soit bien mis à jour
+    Dim topIdx As Long
+    topIdx = LstParticipants.TopIndex
+
+    bCharging = True
+    Call ChargerListeParticipants(idAtelierSelectionne, TxtRechercheParticipant.Value)
+    If topIdx < LstParticipants.ListCount Then
+        LstParticipants.TopIndex = topIdx
+    End If
+    If idx < LstParticipants.ListCount Then
+        LstParticipants.ListIndex = idx
+    End If
+    bCharging = False
+End Sub
+
+' -----------------------------------------------------------------------------
+' EstCoche : vérifie si un ID est dans idsCoches
+' -----------------------------------------------------------------------------
+Private Function EstCoche(idPart As Long) As Boolean
+    EstCoche = False
+    If nbCoches = 0 Then Exit Function
+    Dim i As Long
+    For i = 0 To nbCoches - 1
+        If idsCoches(i) = idPart Then
+            EstCoche = True
             Exit Function
         End If
     Next i
 End Function
 
 ' -----------------------------------------------------------------------------
-' BtnValider_Click : Validation et enregistrement des présences
+' AjouterCoche : ajoute un ID dans idsCoches
+' -----------------------------------------------------------------------------
+Private Sub AjouterCoche(idPart As Long)
+    If EstCoche(idPart) Then Exit Sub
+    ReDim Preserve idsCoches(0 To nbCoches)
+    idsCoches(nbCoches) = idPart
+    nbCoches = nbCoches + 1
+End Sub
+
+' -----------------------------------------------------------------------------
+' RetirerCoche : retire un ID de idsCoches
+' -----------------------------------------------------------------------------
+Private Sub RetirerCoche(idPart As Long)
+    If nbCoches = 0 Then Exit Sub
+    Dim newIds() As Long
+    Dim newNb As Long
+    newNb = 0
+    ReDim newIds(0 To nbCoches - 1)
+    Dim i As Long
+    For i = 0 To nbCoches - 1
+        If idsCoches(i) <> idPart Then
+            newIds(newNb) = idsCoches(i)
+            newNb = newNb + 1
+        End If
+    Next i
+    nbCoches = newNb
+    If newNb > 0 Then
+        ReDim Preserve newIds(0 To newNb - 1)
+        idsCoches = newIds
+    Else
+        ReDim idsCoches(0)
+    End If
+End Sub
+
+' -----------------------------------------------------------------------------
+' BtnValider_Click
 ' -----------------------------------------------------------------------------
 Private Sub BtnValider_Click()
-    Dim idsSelectionnes() As Long
-    Dim nb As Integer
-    Dim i As Integer
-    Dim idx As Integer
-
-    ' Vérifier qu'un atelier est sélectionné
     If idAtelierSelectionne <= 0 Then
         MsgBox "Veuillez sélectionner un atelier.", vbExclamation, "Sélection manquante"
         Exit Sub
     End If
 
-    ' Compter les participants sélectionnés
-    nb = 0
-    For i = 0 To LstParticipants.ListCount - 1
-        If LstParticipants.Selected(i) Then
-            nb = nb + 1
-        End If
-    Next i
-
-    If nb = 0 Then
+    If nbCoches = 0 Then
         MsgBox "Veuillez sélectionner au moins un participant.", vbExclamation, "Sélection manquante"
         Exit Sub
     End If
 
-    ' Récupérer les IDs depuis la colonne 0 (masquée) de LstParticipants
-    ReDim idsSelectionnes(0 To nb - 1)
-    idx = 0
-    For i = 0 To LstParticipants.ListCount - 1
-        If LstParticipants.Selected(i) Then
-            On Error Resume Next
-            idsSelectionnes(idx) = CLng(LstParticipants.List(i, 0))
-            On Error GoTo 0
-            idx = idx + 1
-        End If
+    ' Construire le tableau des IDs cochés
+    Dim idsSelectionnes() As Long
+    ReDim idsSelectionnes(0 To nbCoches - 1)
+    Dim i As Long
+    For i = 0 To nbCoches - 1
+        idsSelectionnes(i) = idsCoches(i)
     Next i
 
-    ' Enregistrer les présences
     Dim succes As Boolean
     succes = EnregistrerPresences(idAtelierSelectionne, idsSelectionnes)
 
@@ -315,9 +384,8 @@ Private Sub BtnValider_Click()
 End Sub
 
 ' -----------------------------------------------------------------------------
-' BtnAnnuler_Click : Fermeture du formulaire sans enregistrement
+' BtnAnnuler_Click
 ' -----------------------------------------------------------------------------
 Private Sub BtnAnnuler_Click()
     Unload Me
 End Sub
-
